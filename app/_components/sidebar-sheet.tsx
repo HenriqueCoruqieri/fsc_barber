@@ -1,10 +1,18 @@
 import Image from "next/image"
 import { Button } from "./ui/button"
-import { CalendarIcon, HomeIcon, LogOutIcon } from "lucide-react"
+import { CalendarIcon, HomeIcon, LogInIcon, LogOutIcon } from "lucide-react"
 import { SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet"
 import { quickSearchOptions } from "../_constants/search"
 import { Avatar, AvatarImage } from "./ui/avatar"
 import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog"
 
 const SidebarSheet = () => {
   return (
@@ -13,7 +21,39 @@ const SidebarSheet = () => {
         <SheetTitle className="text-left">Menu</SheetTitle>
       </SheetHeader>
 
-      <div className="flex items-center gap-3 border-b border-solid p-5">
+      <div className="flex items-center justify-between gap-3 border-b border-solid p-5">
+        <h2 className="text-lg font-bold">Olá Faça seu login</h2>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="icon" className="bg-violet-500 text-white">
+              <LogInIcon />
+            </Button>
+          </DialogTrigger>
+
+          <DialogContent className="w-[80%]">
+            <DialogHeader>
+              <DialogTitle>Faça seu login na plataforma</DialogTitle>
+
+              <DialogDescription>
+                Conecte-se usando sua conta do google
+              </DialogDescription>
+            </DialogHeader>
+
+            <Button
+              variant="secondary"
+              className="bg-violet-500 font-bold text-white"
+            >
+              <Image
+                alt="Fazer login com Google"
+                src="/google.svg"
+                width={18}
+                height={18}
+              />
+              Google
+            </Button>
+          </DialogContent>
+        </Dialog>
+        {/*
         <Avatar size="lg">
           <AvatarImage />
         </Avatar>
@@ -22,6 +62,7 @@ const SidebarSheet = () => {
           <p className="font-bold">Henrique Oliveira</p>
           <p className="text-sm text-gray-400">heoliveirac@gmail.com</p>
         </div>
+        */}
       </div>
 
       <div className="flex flex-col gap-4 border-b border-solid p-4">
