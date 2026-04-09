@@ -120,9 +120,9 @@
     @apply border-border outline-ring;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground h-full;
   }
   html {
-    @apply font-sans;
+    @apply h-full font-sans;
   }
 }
