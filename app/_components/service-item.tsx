@@ -14,7 +14,7 @@ import { Calendar } from "./ui/calendar"
 import { ptBR } from "date-fns/locale"
 import { useEffect, useState } from "react"
 import { addDays, format, set } from "date-fns"
-import { Barbershop, Booking, User } from "@prisma/client"
+import { Barbershop, Booking } from "@prisma/client"
 import { createBooking } from "../_actions/create-booking"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
@@ -133,7 +133,6 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
       })
       await createBooking({
         serviceId: service.id,
-        userId: (data?.user as User).id,
         date: newDate,
       })
       handleBookingSheetOpenChange()
