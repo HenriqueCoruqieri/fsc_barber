@@ -85,9 +85,11 @@ const Home = async () => {
           Agendamentos
         </h2>
 
-        <div className="flex gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-nowrap gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
           {confirmedBookings.map((booking) => (
-            <BookingItem key={booking.id} booking={booking} />
+            <div key={booking.id} className="w-[75%] flex-none">
+              <BookingItem booking={booking} />
+            </div>
           ))}
         </div>
 
