@@ -60,9 +60,11 @@ const SidebarSheet = () => {
           </Button>
         </SheetClose>
 
-        <Button className="justify-start" variant="ghost">
-          <CalendarIcon />
-          Agendamentos
+        <Button className="justify-start" variant="ghost" asChild>
+          <Link href="/bookings">
+            <CalendarIcon />
+            Agendamentos
+          </Link>
         </Button>
       </div>
 
