@@ -10,6 +10,8 @@ import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { authOptions } from "./_lib/auth"
 import { User } from "@prisma/client"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 const Home = async () => {
   const session = await getServerSession(authOptions)
@@ -46,8 +48,15 @@ const Home = async () => {
       {/* HEADER */}
       <Header />
       <div className="p-4">
-        <h2 className="text-xl font-bold">Olá, Henrique!</h2>
-        <p>Terça-Feira - 31/03</p>
+        <h2 className="text-xl font-bold">
+          Olá, {session?.user ? session.user.name : "bem vindo!"}
+        </h2>
+
+        <span className="capitalize">
+          {format(new Date(), "eeee, dd", { locale: ptBR })}
+        </span>
+
+        <span> de {format(new Date(), "MMMM", { locale: ptBR })}</span>
 
         <div className="mt-6">
           <Search />
