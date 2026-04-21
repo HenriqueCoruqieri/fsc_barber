@@ -16,6 +16,7 @@ import { ptBR } from "date-fns/locale"
 const Home = async () => {
   const session = await getServerSession(authOptions)
   const barbershops = await db.barbershop.findMany({})
+  //TODO: Criar uma lógica para as avaliações das barbearias
   const popularBarbershops = await db.barbershop.findMany({
     orderBy: {
       name: "desc",
