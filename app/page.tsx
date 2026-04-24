@@ -91,17 +91,21 @@ const Home = async () => {
         </div>
 
         {/* AGENDAMENTOS */}
-        <h2 className="mt-6 mb-3 text-xs font-bold text-gray-400 uppercase">
-          Agendamentos
-        </h2>
+        {confirmedBookings.length > 0 && (
+          <>
+            <h2 className="mt-6 mb-3 text-xs font-bold text-gray-400 uppercase">
+              Agendamentos
+            </h2>
 
-        <div className="flex flex-nowrap gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-          {confirmedBookings.map((booking) => (
-            <div key={booking.id} className="w-[75%] flex-none">
-              <BookingItem booking={booking} />
+            <div className="flex flex-nowrap gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+              {confirmedBookings.map((booking) => (
+                <div key={booking.id} className="w-[75%] flex-none">
+                  <BookingItem booking={booking} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
 
         <h2 className="mt-6 mb-3 text-xs font-bold text-gray-400 uppercase">
           Recomendados
@@ -114,7 +118,7 @@ const Home = async () => {
         </div>
 
         <h2 className="mt-6 mb-3 text-xs font-bold text-gray-400 uppercase">
-          Populares
+          a
         </h2>
 
         <div className="flex gap-4 overflow-auto [&::-webkit-scrollbar]:hidden">
