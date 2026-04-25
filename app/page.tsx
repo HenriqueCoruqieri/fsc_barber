@@ -99,8 +99,11 @@ const Home = async () => {
 
             <div className="flex flex-nowrap gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
               {confirmedBookings.map((booking) => (
-                <div key={booking.id} className="w-[75%] flex-none">
-                  <BookingItem booking={booking} />
+                <div
+                  key={JSON.parse(JSON.stringify(booking.id))}
+                  className="w-[75%] flex-none"
+                >
+                  <BookingItem booking={JSON.parse(JSON.stringify(booking))} />
                 </div>
               ))}
             </div>
@@ -118,7 +121,7 @@ const Home = async () => {
         </div>
 
         <h2 className="mt-6 mb-3 text-xs font-bold text-gray-400 uppercase">
-          a
+          Populares
         </h2>
 
         <div className="flex gap-4 overflow-auto [&::-webkit-scrollbar]:hidden">
