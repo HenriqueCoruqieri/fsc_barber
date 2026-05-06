@@ -217,7 +217,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                     Fazer Reserva
                   </SheetHeader>
 
-                  <div className="border-b border-solid">
+                  <div className="border-b border-solid px-2">
                     <Calendar
                       variant="booking"
                       mode="single"
@@ -229,7 +229,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                   </div>
 
                   {selectedDay && (
-                    <div className="flex gap-3 overflow-x-auto border-b border-solid p-4 [&::-webkit-scrollbar]:hidden">
+                    <div className="flex flex-nowrap gap-3 overflow-x-auto border-b border-solid p-4 [&::-webkit-scrollbar]:hidden">
                       {timeList.length > 0 ? (
                         timeList.map((time) => (
                           <Button
@@ -237,7 +237,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                             variant={
                               selectedTime == time ? "default" : "outline"
                             }
-                            className="rounded-full bg-violet-500 text-white"
+                            className="mb-3 shrink-0 rounded-full bg-violet-500 whitespace-nowrap text-white"
                             onClick={() => handleTimeSelect(time)}
                           >
                             {time}
@@ -252,7 +252,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                   )}
 
                   {selectedDate && (
-                    <div className="p-5">
+                    <div className="mt-6 p-5">
                       <BookingSummary
                         barbershop={barbershop}
                         service={service}
@@ -261,7 +261,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                     </div>
                   )}
 
-                  <SheetFooter className="px-5">
+                  <SheetFooter className="mb-2 px-5">
                     <SheetClose asChild>
                       <Button
                         className="bg-violet-500 text-white"
