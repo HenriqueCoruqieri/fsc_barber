@@ -212,66 +212,68 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                   Reservar
                 </Button>
 
-                <SheetContent>
+                <SheetContent className="flex flex-col overflow-hidden">
                   <SheetHeader className="text-center text-2xl font-semibold">
                     Fazer Reserva
                   </SheetHeader>
 
-                  <div className="border-b border-solid px-2">
-                    <Calendar
-                      variant="booking"
-                      mode="single"
-                      locale={ptBR}
-                      selected={selectedDay}
-                      onSelect={handleDateSelect}
-                      fromDate={addDays(new Date(), 1)}
-                    />
-                  </div>
-
-                  {selectedDay && (
-                    <div className="flex flex-nowrap gap-3 overflow-x-auto border-b border-solid p-4 [&::-webkit-scrollbar]:hidden">
-                      {timeList.length > 0 ? (
-                        timeList.map((time) => (
-                          <Button
-                            key={time}
-                            variant={
-                              selectedTime == time ? "default" : "outline"
-                            }
-                            className="mb-3 shrink-0 rounded-full bg-violet-500 whitespace-nowrap text-white"
-                            onClick={() => handleTimeSelect(time)}
-                          >
-                            {time}
-                          </Button>
-                        ))
-                      ) : (
-                        <p className="text-xs">
-                          Não há horários disponíveis para este dia
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {selectedDate && (
-                    <div className="mt-6 p-5">
-                      <BookingSummary
-                        barbershop={barbershop}
-                        service={service}
-                        selectedDate={selectedDate}
+                  <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                    <div className="border-b border-solid px-2">
+                      <Calendar
+                        variant="booking"
+                        mode="single"
+                        locale={ptBR}
+                        selected={selectedDay}
+                        onSelect={handleDateSelect}
+                        fromDate={addDays(new Date(), 1)}
                       />
                     </div>
-                  )}
 
-                  <SheetFooter className="mb-2 px-5">
-                    <SheetClose asChild>
-                      <Button
-                        className="bg-violet-500 text-white"
-                        onClick={handleCreateBooking}
-                        disabled={!selectedDay || !selectedTime}
-                      >
-                        Confirmar
-                      </Button>
-                    </SheetClose>
-                  </SheetFooter>
+                    {selectedDay && (
+                      <div className="mt-3 flex flex-nowrap gap-3 overflow-x-auto border-b border-solid p-2 [&::-webkit-scrollbar]:hidden">
+                        {timeList.length > 0 ? (
+                          timeList.map((time) => (
+                            <Button
+                              key={time}
+                              variant={
+                                selectedTime == time ? "default" : "outline"
+                              }
+                              className="mb-3 shrink-0 rounded-full bg-violet-500 whitespace-nowrap text-white"
+                              onClick={() => handleTimeSelect(time)}
+                            >
+                              {time}
+                            </Button>
+                          ))
+                        ) : (
+                          <p className="text-xs">
+                            Não há horários disponíveis para este dia
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedDate && (
+                      <div className="mt-6 p-5">
+                        <BookingSummary
+                          barbershop={barbershop}
+                          service={service}
+                          selectedDate={selectedDate}
+                        />
+                      </div>
+                    )}
+
+                    <SheetFooter className="mb-2 px-5">
+                      <SheetClose asChild>
+                        <Button
+                          className="bg-violet-500 text-white"
+                          onClick={handleCreateBooking}
+                          disabled={!selectedDay || !selectedTime}
+                        >
+                          Confirmar
+                        </Button>
+                      </SheetClose>
+                    </SheetFooter>
+                  </div>
                 </SheetContent>
               </Sheet>
             </div>
