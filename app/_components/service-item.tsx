@@ -217,7 +217,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                     Fazer Reserva
                   </SheetHeader>
 
-                  <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                  <div className="flex-1 overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden">
                     <div className="border-b border-solid px-2">
                       <Calendar
                         variant="booking"
