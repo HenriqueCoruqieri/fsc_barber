@@ -116,6 +116,45 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run lint` | ESLint |
 | `npx prisma studio` | Interface para visualizar o banco |
 
+## MCPs para agentes
+
+Opcional: só é necessário para quem usa o [Claude Code](https://claude.com/claude-code) com o fluxo de agentes do projeto. O arquivo `.mcp.json` (versionado) configura cinco servidores MCP:
+
+| Servidor | Para que serve |
+| -------- | -------------- |
+| `playwright` | Controla um navegador (isolado e sem interface) para testar as telas |
+| `context7` | Consulta documentação atualizada de bibliotecas |
+| `neon` | Acessa o projeto no Neon (MCP remoto em `https://mcp.neon.tech/mcp`), usado para inspecionar o banco |
+| `next-devtools` | Ferramentas do Next.js (erros, rotas, logs). Só responde com `npm run dev` rodando |
+| `shadcn` | Busca e adiciona componentes do shadcn/ui |
+
+Os servidores locais rodam via `cmd /c npx -y ...` (configuração pensada para Windows).
+
+### Configurar a `NEON_API_KEY`
+
+O servidor `neon` lê a chave da variável de ambiente `NEON_API_KEY`. Ela **não** vai no `.env` nem em nenhum arquivo do repositório.
+
+1. No [console do Neon](https://console.neon.tech), abra as configurações de **API keys** e crie uma chave com **escopo de projeto**, limitada ao projeto deste app (não use uma chave da conta inteira).
+2. Defina a variável no ambiente do Windows (substitua pelo valor da chave):
+
+   ```powershell
+   setx NEON_API_KEY "SUA_CHAVE"
+   ```
+
+3. Feche e reabra o terminal, o VS Code e o Claude Code, para que enxerguem a nova variável.
+
+> **Atenção:** defina a variável **antes** de abrir o Claude Code neste projeto. Sem ela, a configuração MCP pode falhar ao carregar.
+
+### Usar
+
+1. Abra o Claude Code na pasta do projeto e rode `/mcp` para aprovar os servidores do `.mcp.json`.
+2. Se o Playwright reclamar que não encontrou o navegador, rode `npx playwright install chromium`.
+3. Para usar o `next-devtools`, deixe `npm run dev` rodando.
+
+### Segurança do MCP do Neon
+
+O MCP do Neon tem acesso ao projeto inteiro: a chave de projeto limita o alcance, mas não impede escrita. As proteções são a lista de ferramentas permitidas e as regras de uso em [rules.md](rules.md). Se algo for alterado por engano, restaure o branch pelo histórico do Neon (point-in-time restore, na aba **Backup & Restore** do projeto). A janela de retenção depende do plano da conta: confira o seu.
+
 ## Contribuindo
 
 - Commits seguem [Conventional Commits](https://www.conventionalcommits.org/) — validados automaticamente no `commit-msg`.

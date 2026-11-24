@@ -45,3 +45,6 @@ next-env.d.ts
 
 # dev-flow (artefatos dos agentes)
 .claude/flow/
+
+# playwright mcp (saída do navegador: screenshots, snapshots, logs)
+.playwright-mcp/
