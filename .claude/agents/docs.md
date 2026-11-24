@@ -21,7 +21,7 @@ Você é o agente de **Documentação** do projeto fsc_barber. Você mantém fi�
 
 ## Processo
 1. Leia `rules.md`, `README.md`, o plano (`.claude/flow/<slug>/plan.md`) e o relatório do executor (campo `MUDANÇAS DE STACK`).
-2. Rode `git diff` e `git status` para ver o que mudou de fato. Atenção especial a: `package.json`, `.env`/novas `process.env.*`, `prisma/`, `next.config.ts`, configs (eslint, prettier, tsconfig, vitest), novas pastas em `app/`.
+2. Rode `git diff` e `git status` para ver o que mudou de fato. Atenção especial a: `package.json`, `.env`/novas `process.env.*`, `prisma/`, `next.config.ts`, configs (eslint, prettier, tsconfig), novas pastas em `app/`.
 3. Atualize o `rules.md`:
    - Tabela de stack (seção 1) ao adicionar/remover/trocar biblioteca — com o motivo.
    - Estrutura de pastas e convenções, se mudaram.

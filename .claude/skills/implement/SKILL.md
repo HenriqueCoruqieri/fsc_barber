@@ -29,8 +29,7 @@ Nunca implemente sem plano — reviewer e QA dependem dos critérios de aceite d
 
 ## 2. Preparação
 1. Rode `git status`. Se houver mudanças não commitadas que não são deste plano, avise e pergunte se deve continuar (elas se misturariam aos commits).
-2. Se o `rules.md` indicar que não há test runner configurado e o plano não tiver uma etapa para isso, pergunte ao usuário se pode configurar Vitest + Testing Library como **Etapa 0** (`chore: setup vitest and testing library`), executada pelo `qa`, com review, docs e commit próprios.
-3. Leia o plano e identifique a primeira etapa com `Status: pendente`. Se o plano estiver sendo retomado, avise de qual etapa vai continuar.
+2. Leia o plano e identifique a primeira etapa com `Status: pendente`. Se o plano estiver sendo retomado, avise de qual etapa vai continuar.
 
 ## 3. Para cada etapa pendente, em ordem
 
@@ -50,7 +49,7 @@ Se `Precisa de review: sim` → chame `reviewer` (rodada 1).
 
 ### 3.4 QA
 Chame `qa` com o relatório do executor e, se houver, o do reviewer.
-- `BLOCKED` (sem test runner) → volte ao passo 2.2.
+- `BLOCKED` (MCP indisponível, `NEON_API_KEY` ausente, `qa:session` falhando ou dev server que não sobe) → leve o motivo ao usuário e aguarde que ele resolva (ex.: definir a variável, reiniciar o Claude Code) antes de chamar o QA de novo.
 - `REJECTED` → envie as inconformidades ao(s) executor(es) indicado(s) via SendMessage → se a etapa tem review, chame o `reviewer` apenas sobre o diff da correção → chame o `qa` novamente.
 - Máximo **3 rodadas**. Depois disso, mostre as inconformidades ao usuário e pergunte como seguir.
 
@@ -75,7 +74,7 @@ Só então avance para a próxima etapa.
 ## 4. Encerramento
 Quando todas as etapas estiverem concluídas, mostre:
 - Etapas com os commits (`git log --oneline -<n>`)
-- Testes criados
+- Roteiros executados pelo QA (nos `qa-report-etapa-<n>.md`)
 - Premissas assumidas pelo arquiteto
 - **Sugestões do reviewer não aplicadas** — pergunte se o usuário quer transformá-las em um novo plano de `refactor:` (via `/consult`).
 

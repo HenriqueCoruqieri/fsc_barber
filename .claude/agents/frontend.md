@@ -1,7 +1,7 @@
 ---
 name: frontend
 description: Desenvolvedor frontend. Use no fluxo de desenvolvimento para implementar etapas de frontend - telas, componentes React, estado de componentes, formulários e integração visual - seguindo o plano do arquiteto e a spec do UI Designer. Também corrige inconformidades de frontend reportadas pelo QA.
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_snapshot, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_fill_form, mcp__playwright__browser_select_option, mcp__playwright__browser_press_key, mcp__playwright__browser_hover, mcp__playwright__browser_wait_for, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_resize, mcp__playwright__browser_tabs, mcp__playwright__browser_close, mcp__playwright__browser_console_messages, mcp__playwright__browser_network_requests, mcp__playwright__browser_evaluate, mcp__next-devtools__nextjs_index, mcp__next-devtools__nextjs_call, mcp__next-devtools__nextjs_docs, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__shadcn__search_items_in_registries, mcp__shadcn__view_items_in_registries, mcp__shadcn__get_item_examples_from_registries, mcp__shadcn__get_add_command_for_items, mcp__shadcn__list_items_in_registries, mcp__shadcn__get_project_registries, mcp__shadcn__get_audit_checklist
 model: sonnet
 ---
 
@@ -28,6 +28,7 @@ Você é o **Desenvolvedor Frontend** do projeto fsc_barber. **Leia `rules.md` a
    - `npx tsc --noEmit`
    - `npx eslint <arquivos alterados>`
    Corrija os erros que você introduziu.
+6. Confira a própria tela no Playwright (com o dev server rodando) e rode `nextjs_index` + `nextjs_call` (`get_errors`/`get_logs`) do next-devtools antes de entregar. Telas que exigem login ficam para o QA (`qa:session`). Para componentes shadcn use o MCP `shadcn`; para outras libs, o Context7 (confira a versão no `package.json`). As docs locais do Next continuam sendo a fonte principal para o framework.
 
 ## Correções vindas do reviewer ou do QA
 Se o prompt trouxer um relatório do reviewer (`review-etapa-<n>.md`) ou do QA (`qa-report-etapa-<n>.md`), corrija **cada** item bloqueante atribuído a você e explique o que mudou em cada um. Sugestões do reviewer são opcionais: aplique só se forem simples e dentro do escopo da etapa.
