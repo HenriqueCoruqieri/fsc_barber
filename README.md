@@ -10,7 +10,7 @@ A lista completa da stack e das convenções do projeto está em [rules.md](rule
 
 ## Pré-requisitos
 
-- [Node.js](https://nodejs.org) 20 ou superior (com npm)
+- [Node.js](https://nodejs.org) 20 ou superior (com npm). Para usar o script `qa:session` (opcional, veja abaixo) é necessário Node **22.18 ou superior**
 - Um banco **PostgreSQL** (local, Docker ou serviço como Neon/Supabase)
 - Credenciais OAuth do **Google** ([Google Cloud Console](https://console.cloud.google.com/apis/credentials))
 
@@ -115,6 +115,8 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run start` | Sobe o build de produção |
 | `npm run lint` | ESLint |
 | `npx prisma studio` | Interface para visualizar o banco |
+| `npm run -s qa:session` | Cria/atualiza os usuários de teste QA e imprime no stdout um JSON com as sessões (veja [Sessões de teste](#sessões-de-teste-qasession)) |
+| `npm run -s qa:session -- --reset` | Igual ao anterior, mas apaga antes as reservas dos usuários QA |
 
 ## MCPs para agentes
 
@@ -154,6 +156,19 @@ O servidor `neon` lê a chave da variável de ambiente `NEON_API_KEY`. Ela **nã
 ### Segurança do MCP do Neon
 
 O servidor `neon` roda em **modo só leitura**: o `.mcp.json` envia o header `x-read-only: "true"`, então o servidor expõe apenas ferramentas de listar/descrever e executa o SQL em transações read-only. Escrita pelo MCP fica bloqueada pelo próprio servidor. Como segunda camada, valem as regras de uso em [rules.md](rules.md) (só `SELECT`, sem colunas de credencial, com `LIMIT`) e a chave de API de escopo de projeto. Por precaução, o histórico do Neon permite restaurar o branch (point-in-time restore, na aba **Backup & Restore** do projeto); a janela de retenção depende do plano da conta.
+
+### Sessões de teste (`qa:session`)
+
+Permite que o agente de QA navegue logado sem passar pelo login do Google. O script cria/atualiza os usuários `qa1@fsc-barber.test` e `qa2@fsc-barber.test`, recria uma sessão de 24h para cada um e imprime no stdout um JSON com `baseUrl`, `cookieName` (`next-auth.session-token`) e, por usuário, `email`, `name`, `userId`, `sessionToken` e `expires`.
+
+```bash
+npm run -s qa:session            # cria/atualiza usuários e sessões
+npm run -s qa:session -- --reset # apaga antes as reservas dos usuários QA
+```
+
+- Use **sempre** `npm run -s` (silencioso); sem o `-s` o npm imprime um cabeçalho no stdout e quebra o JSON.
+- Só escreve nos usuários QA e se recusa a rodar com `NODE_ENV=production`.
+- Usa o `DATABASE_URL` do `.env` e exige Node 22.18 ou superior. Um aviso `MODULE_TYPELESS_PACKAGE_JSON` no stderr é esperado e inofensivo.
 
 ## Contribuindo
 

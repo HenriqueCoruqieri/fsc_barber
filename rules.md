@@ -38,7 +38,7 @@ app/
   _providers/   providers React
   api/          route handlers (ex.: api/auth)
   <rota>/       páginas (barbershops, bookings, ...)
-prisma/         schema, migrations, seed.ts
+prisma/         schema, migrations, seed.ts, qa-session.ts (sessões de teste do QA)
 ```
 
 Pastas com `_` são privadas (não viram rotas).
@@ -84,7 +84,7 @@ O MCP do Neon acessa o banco real do projeto. A proteção principal é o **modo
 - Apenas `SELECT`. Nunca `INSERT`, `UPDATE`, `DELETE` ou DDL via MCP.
 - Nunca consultar colunas de credencial (tokens, senhas, `access_token`, `refresh_token`, `id_token` etc.).
 - Consultas filtradas e com `LIMIT`; nada de varrer tabelas inteiras.
-- Dados de teste só são criados via `npm run qa:session` (script previsto para a próxima etapa do plano `mcp-testes`; ainda não existe).
+- Dados de teste só são criados via `npm run -s qa:session` (`prisma/qa-session.ts`; `-- --reset` apaga antes as reservas dos usuários QA). Sempre com `-s`, senão o cabeçalho do npm quebra o JSON no stdout. O script só escreve nos usuários `qa1@/qa2@fsc-barber.test`, recusa `NODE_ENV=production` e exige Node >= 22.18.
 - Alterações de schema só por migration do Prisma, e somente quando autorizadas.
 
 ## 4. Git e commits
