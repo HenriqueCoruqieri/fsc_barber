@@ -107,9 +107,9 @@ As skills ficam em `.claude/skills/`.
 | `ui-designer` | Especifica layout, componentes, estados visuais, responsividade e acessibilidade | Não |
 | `frontend` | Páginas, componentes, estado e formulários | Sim |
 | `backend` | Server actions, dados, API, Prisma, auth, validação; integra com a UI | Sim |
-| `reviewer` | Revisa o diff da etapa (bugs, segurança, aderência ao `rules.md`, reuso) antes do QA; aprova ou pede mudanças | Não (só leitura) |
+| `reviewer` | Revisa o diff da etapa (bugs, segurança, aderência ao `rules.md`, reuso) antes do QA; aprova ou pede mudanças | Não (só o próprio relatório) |
 | `qa` | Testes unitários do código novo + regressão do sistema; aprova ou rejeita | Só testes |
-| `docs` | Mantém `rules.md` e `README.md` atualizados | Só documentação |
+| `docs` | Mantém `rules.md`, `README.md` e os arquivos do fluxo (`.claude/agents`, `.claude/skills`) atualizados | Só documentação |
 | `commit-manager` | Identifica o ponto de commit e sugere a mensagem | Não (só leitura do git) |
 
 ### Ordem
