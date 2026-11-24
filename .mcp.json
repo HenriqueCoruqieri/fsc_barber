@@ -12,7 +12,8 @@
       "type": "http",
       "url": "https://mcp.neon.tech/mcp",
       "headers": {
-        "Authorization": "Bearer ${NEON_API_KEY}"
+        "Authorization": "Bearer ${NEON_API_KEY}",
+        "x-read-only": "true"
       }
     },
     "next-devtools": {

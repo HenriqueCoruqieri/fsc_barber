@@ -124,7 +124,7 @@ Opcional: só é necessário para quem usa o [Claude Code](https://claude.com/cl
 | -------- | -------------- |
 | `playwright` | Controla um navegador (isolado e sem interface) para testar as telas |
 | `context7` | Consulta documentação atualizada de bibliotecas |
-| `neon` | Acessa o projeto no Neon (MCP remoto em `https://mcp.neon.tech/mcp`), usado para inspecionar o banco |
+| `neon` | Acessa o projeto no Neon (MCP remoto em `https://mcp.neon.tech/mcp`), em modo só leitura, usado para inspecionar o banco |
 | `next-devtools` | Ferramentas do Next.js (erros, rotas, logs). Só responde com `npm run dev` rodando |
 | `shadcn` | Busca e adiciona componentes do shadcn/ui |
 
@@ -153,7 +153,7 @@ O servidor `neon` lê a chave da variável de ambiente `NEON_API_KEY`. Ela **nã
 
 ### Segurança do MCP do Neon
 
-O MCP do Neon tem acesso ao projeto inteiro: a chave de projeto limita o alcance, mas não impede escrita. As proteções são a lista de ferramentas permitidas e as regras de uso em [rules.md](rules.md). Se algo for alterado por engano, restaure o branch pelo histórico do Neon (point-in-time restore, na aba **Backup & Restore** do projeto). A janela de retenção depende do plano da conta: confira o seu.
+O servidor `neon` roda em **modo só leitura**: o `.mcp.json` envia o header `x-read-only: "true"`, então o servidor expõe apenas ferramentas de listar/descrever e executa o SQL em transações read-only. Escrita pelo MCP fica bloqueada pelo próprio servidor. Como segunda camada, valem as regras de uso em [rules.md](rules.md) (só `SELECT`, sem colunas de credencial, com `LIMIT`) e a chave de API de escopo de projeto. Por precaução, o histórico do Neon permite restaurar o branch (point-in-time restore, na aba **Backup & Restore** do projeto); a janela de retenção depende do plano da conta.
 
 ## Contribuindo
 

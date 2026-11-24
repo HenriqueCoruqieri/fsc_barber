@@ -22,7 +22,7 @@ Este arquivo é mantido pelo agente `docs`. Ao adotar uma nova biblioteca, padr�
 | Banco | PostgreSQL + Prisma 6 (`engine: classic`) | Config em `prisma.config.ts`, schema em `prisma/schema.prisma`. |
 | Autenticação | NextAuth v4 + `@next-auth/prisma-adapter` | Provider Google. Config em `app/_lib/auth.ts`. |
 | Qualidade | ESLint 9 (`eslint-config-next`), Prettier + `prettier-plugin-tailwindcss` | |
-| MCPs (agentes) | playwright, context7, neon (remoto), next-devtools, shadcn | Configurados em `.mcp.json` (versionado). Servidores locais via `cmd /c npx -y`; Neon via `https://mcp.neon.tech/mcp` com `Authorization: Bearer ${NEON_API_KEY}`. `playwright` roda com `--isolated --headless`; saída em `.playwright-mcp/` (ignorada pelo git). Setup no README. |
+| MCPs (agentes) | playwright, context7, neon (remoto), next-devtools, shadcn | Configurados em `.mcp.json` (versionado). Servidores locais via `cmd /c npx -y`; Neon via `https://mcp.neon.tech/mcp` com `Authorization: Bearer ${NEON_API_KEY}` e em modo só leitura (`x-read-only: "true"`). `playwright` roda com `--isolated --headless`; saída em `.playwright-mcp/` (ignorada pelo git). Setup no README. |
 | Git hooks | husky + lint-staged + git-commit-msg-linter | `pre-commit` roda eslint --fix e prettier nos `.ts/.tsx`; `commit-msg` valida Conventional Commits. |
 
 ## 2. Estrutura de pastas
@@ -79,7 +79,7 @@ Pastas com `_` são privadas (não viram rotas).
 
 ### Uso do MCP do Neon
 
-O MCP do Neon acessa o banco real do projeto. Todo agente que o usar deve seguir:
+O MCP do Neon acessa o banco real do projeto. A proteção principal é o **modo só leitura do servidor** (header `x-read-only: "true"` em `.mcp.json`): só ficam disponíveis ferramentas de listar/descrever e o SQL roda em transações read-only. As regras abaixo continuam valendo como segunda camada. Todo agente que o usar deve seguir:
 
 - Apenas `SELECT`. Nunca `INSERT`, `UPDATE`, `DELETE` ou DDL via MCP.
 - Nunca consultar colunas de credencial (tokens, senhas, `access_token`, `refresh_token`, `id_token` etc.).
@@ -171,7 +171,7 @@ Sempre que a etapa:
 
 Registro curto de decisões técnicas (mais recente primeiro). Formato: `AAAA-MM-DD — decisão — motivo`.
 
-- 2026-11-24 — Adotados MCPs (playwright, context7, neon, next-devtools, shadcn) em `.mcp.json`, com o Neon remoto autenticado por API key de escopo de projeto (`NEON_API_KEY`, fora do repositório) — dar aos agentes navegador, documentação atualizada e inspeção do banco. Risco residual: o `run_sql` do Neon aceita escrita; a proteção é por instrução (seção "Uso do MCP do Neon") e revisão, e o recurso de recuperação é o point-in-time restore do Neon.
+- 2026-11-24 — Adotados MCPs (playwright, context7, neon, next-devtools, shadcn) em `.mcp.json`, com o Neon remoto autenticado por API key de escopo de projeto (`NEON_API_KEY`, fora do repositório) — dar aos agentes navegador, documentação atualizada e inspeção do banco. Servidor em modo só leitura (`x-read-only: "true"`): o `run_sql` roda em transação read-only e a escrita pelo MCP fica bloqueada pelo servidor; as regras da seção "Uso do MCP do Neon" e a revisão são segunda camada, e o point-in-time restore do Neon é o recurso de recuperação.
 
 - 2026-11-23 — Evitar `useEffect` e tipar props com `interface` — efeitos causam renderizações extras e bugs de sincronização quando usados para buscar dados ou derivar estado; `interface` padroniza a tipagem já usada nos componentes existentes.
 
