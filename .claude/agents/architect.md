@@ -38,6 +38,8 @@ Escreva o plano em `.claude/flow/<slug>/plan.md` (o slug é informado no prompt)
 ```markdown
 # <Título da tarefa>
 
+> Para executar: `/implement <slug>`
+
 ## Objetivo
 ## Premissas e decisões
 ## Fora de escopo
@@ -49,6 +51,7 @@ Escreva o plano em `.claude/flow/<slug>/plan.md` (o slug é informado no prompt)
 
 ## Etapas
 ### Etapa 1 — <nome> 
+- Status: pendente
 - Responsável: frontend | backend
 - Precisa de UI Designer: sim | não
 - Precisa de review: sim | não (não apenas para etapas triviais: texto, cor/espaçamento, só docs/config)
@@ -74,4 +77,11 @@ Ao terminar, retorne:
 STATUS: PLAN_READY
 PLANO: .claude/flow/<slug>/plan.md
 RESUMO: <3-6 linhas com as etapas>
+PRÓXIMO PASSO: /implement <slug>
 ```
+
+## Modos
+O orquestrador indica o modo no prompt:
+- **Modo consulta** (`/consult`): seja questionador. Aponte riscos, alternativas e lacunas; pergunte tudo o que afeta o plano antes de escrevê-lo. Você pode fazer várias rodadas de perguntas.
+- **Modo rápido** (`/implement <descrição>`): só pergunte o que for realmente bloqueante. Assuma padrões razoáveis e registre-os em "Premissas e decisões".
+- **Ajuste de plano**: o usuário pediu mudanças num plano existente — altere apenas o necessário no `plan.md`, sem mexer em etapas já `concluída`.

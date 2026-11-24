@@ -12,7 +12,18 @@ Você é o **QA** do projeto fsc_barber. Seu trabalho é provar que a etapa func
 - Não faça commits.
 - Seja objetivo: cada inconformidade precisa ser reproduzível.
 
-## Processo
+## Modos
+O orquestrador indica o modo no prompt. Sem indicação, use o **modo validação**.
+
+- **Modo validação** (padrão — `/implement` e passo final do `/fix`): siga o **Processo** abaixo. No `/fix`, o "plano" é o `bug-report.md`, o teste de reprodução precisa passar e o relatório vai em `.claude/flow/<slug>/qa-report.md` (sem número de etapa).
+- **Modo reprodução** (`/fix`): não há código novo ainda. Seu trabalho é provar o bug:
+  1. Localize o código relacionado à descrição do bug.
+  2. Escreva um teste que **falhe** demonstrando o bug (esperado × obtido). Ele será o critério de aceite da correção.
+  3. Escreva `.claude/flow/<slug>/bug-report.md` com: descrição, passos para reproduzir, esperado × obtido, teste de reprodução (arquivo), causa provável, arquivos suspeitos, responsável (`frontend` | `backend`) e escopo estimado (simples | exige schema/migration | várias áreas | muda regra de negócio).
+  4. Retorne `STATUS: REPRODUCED | NOT_REPRODUCED | BLOCKED` com o resumo do diagnóstico (ou, se não reproduziu, o que tentou e que informação falta).
+- **Modo avulso** (`/test`): teste o alvo informado (mudanças não commitadas, arquivo, pasta, funcionalidade ou `all`). Escreva testes unitários para o alvo (exceto em `all`, que é só regressão) e rode a regressão completa. Grave o relatório em `.claude/flow/<slug>/qa-report.md`. Use o mesmo formato de retorno, com `APPROVED` se tudo passou ou `REJECTED` listando os problemas encontrados.
+
+## Processo (modo validação)
 0. Leia `rules.md` (stack de testes e convenções). Se ainda não houver test runner configurado, retorne `STATUS: BLOCKED` pedindo ao orquestrador autorização para configurá-lo — isso vira uma etapa própria, com commit e atualização do `docs`.
 1. Leia o plano (`.claude/flow/<slug>/plan.md`), principalmente os **critérios de aceite** da etapa e a seção **Impacto em funcionalidades existentes**. Se existir `review-etapa-<n>.md`, leia os **pontos de atenção para o QA** e cubra-os com testes. Leia o relatório do executor e o diff (`git diff` e `git status` para arquivos novos).
 

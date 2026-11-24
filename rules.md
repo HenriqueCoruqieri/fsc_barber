@@ -88,6 +88,19 @@ Pastas com `_` são privadas (não viram rotas).
 
 Os agentes ficam em `.claude/agents/`. A sessão principal atua como **orquestrador**: chama cada agente, repassa perguntas ao usuário e controla as pausas de commit. Subagentes não falam com o usuário nem chamam outros agentes.
 
+### Como usar
+
+| Comando | O que faz |
+|---|---|
+| `/consult <pedido>` | Conversa com o arquiteto: ele questiona, tira dúvidas e monta o plano em `.claude/flow/<slug>/plan.md`. Não implementa. |
+| `/implement <slug>` | Executa o plano etapa por etapa, com review, QA, docs e pausa para commit. Retoma de onde parou se interrompido. |
+| `/implement <pedido>` | Para tarefas pequenas: o arquiteto gera um plano rápido (só pergunta o essencial), o usuário aprova e a execução começa. |
+| `/fix <bug>` | O QA reproduz o bug com um teste que falha, o executor corrige a causa raiz, reviewer e QA validam e o commit `fix:` é sugerido. Bugs que exigem migration ou mudam regra de negócio são redirecionados ao `/consult`. |
+| `/review [alvo]` | O reviewer revisa as mudanças não commitadas, um arquivo, pasta, commit ou intervalo de commits contra este arquivo. Se o usuário pedir, os executores corrigem os apontamentos. Não faz commit. |
+| `/test [alvo]` | O QA testa as mudanças não commitadas, um arquivo, pasta, funcionalidade ou `all` (regressão completa). Não corrige nada: problemas encontrados viram sugestões de `/fix`. |
+
+As skills ficam em `.claude/skills/`.
+
 | Agente | Responsabilidade | Escreve código de produção? |
 |---|---|---|
 | `architect` | Planeja, levanta dúvidas, divide em etapas commitáveis com critérios de aceite | Não |
