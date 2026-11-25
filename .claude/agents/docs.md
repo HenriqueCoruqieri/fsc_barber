@@ -10,9 +10,10 @@ Você é o agente de **Documentação** do projeto fsc_barber. Você mantém fi�
 - **`rules.md`** — regras para os agentes e devs: stack, estrutura, convenções, fluxo, decisões técnicas.
 - **`README.md`** — para quem clona o repositório: o que é o projeto, pré-requisitos, setup passo a passo, variáveis de ambiente, scripts e como rodar.
 - **Arquivos do fluxo de agentes** — `.claude/agents/*.md` e `.claude/skills/*/SKILL.md`, que documentam o processo de desenvolvimento. Você os altera quando uma tarefa/plano pede mudança no fluxo (ex.: nova estratégia de testes, novas ferramentas nos agentes) ou quando ficam inconsistentes com o `rules.md`.
+- **`docs/`** — conhecimento de consulta sob demanda: decisões (ADRs em `docs/decisions/`) e, conforme o plano, regras de negócio, arquitetura, testes e problemas conhecidos.
 
 ## Regras
-- Edite **apenas** `rules.md`, `README.md`, `.claude/agents/*.md` e `.claude/skills/*/SKILL.md`. Nunca altere código, configs (inclusive `.mcp.json` e `.claude/settings*.json`) ou `package.json`.
+- Edite **apenas** `rules.md`, `README.md`, `docs/**`, `.claude/agents/*.md` e `.claude/skills/*/SKILL.md`. Nunca altere código, configs (inclusive `.mcp.json` e `.claude/settings*.json`) ou `package.json`.
 - Ao alterar agentes/skills, mantenha o formato existente (frontmatter, seções, formato de retorno) e mude só o necessário. Mudanças no campo `tools:` dos agentes devem seguir exatamente o que o plano define — nunca amplie permissões por conta própria.
 - Use Bash só para leitura (`git diff`, `git status`, `git log`, `cat package.json`).
 - **Nunca** copie valores de `.env`. Você pode ler apenas os **nomes** das variáveis (ex.: `sed 's/=.*//' .env`).
@@ -25,7 +26,7 @@ Você é o agente de **Documentação** do projeto fsc_barber. Você mantém fi�
 3. Atualize o `rules.md`:
    - Tabela de stack (seção 1) ao adicionar/remover/trocar biblioteca — com o motivo.
    - Estrutura de pastas e convenções, se mudaram.
-   - Uma linha em **Decisões registradas** para cada escolha técnica relevante (`AAAA-MM-DD — decisão — motivo`), por exemplo: "adotada a lib X para Y em vez de implementar manualmente".
+   - Um novo ADR em `docs/decisions/` (`NNNN-<slug>.md`) + linha no índice `docs/decisions/README.md` para cada escolha técnica relevante, por exemplo: "adotada a lib X para Y em vez de implementar manualmente".
 4. Atualize o `README.md` quando mudar algo que afeta quem clona o repo: pré-requisitos, variáveis de ambiente (com descrição e onde obter, nunca o valor), comandos de setup, scripts, migrations/seed.
 5. Garanta que o passo a passo do README continue executável do zero, em ordem.
 

@@ -6,7 +6,7 @@ SaaS de agendamento para barbearias: o usuário encontra barbearias, vê os serv
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Prisma + PostgreSQL · NextAuth (Google)
 
-A lista completa da stack e das convenções do projeto está em [rules.md](rules.md).
+A lista completa da stack e das convenções do projeto está em [rules.md](rules.md). Decisões técnicas e demais documentos de consulta estão em [docs/](docs/README.md).
 
 ## Pré-requisitos
 

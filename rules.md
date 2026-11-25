@@ -2,6 +2,8 @@
 
 Fonte única de verdade sobre stack, convenções e fluxo de desenvolvimento. **Todo agente deve ler este arquivo antes de trabalhar.**
 
+Este arquivo contém as **regras vigentes**. O conhecimento de consulta (decisões, regras de negócio, testes, arquitetura, problemas conhecidos) fica em `docs/`: veja [docs/README.md](docs/README.md).
+
 Este arquivo é mantido pelo agente `docs`. Ao adotar uma nova biblioteca, padrão ou ferramenta, ele é atualizado no mesmo ciclo da tarefa que causou a mudança.
 
 ---
@@ -40,6 +42,7 @@ app/
   api/          route handlers (ex.: api/auth)
   <rota>/       páginas (barbershops, bookings, ...)
 prisma/         schema, migrations, seed.ts, qa-session.ts (sessões de teste do QA)
+docs/           documentação de consulta (decisões/ADRs etc.); índice em docs/README.md
 ```
 
 Pastas com `_` são privadas (não viram rotas).
@@ -116,7 +119,7 @@ As skills ficam em `.claude/skills/`.
 | `backend` | Server actions, dados, API, Prisma, auth, validação; integra com a UI | Sim |
 | `reviewer` | Revisa o diff da etapa (bugs, segurança, aderência ao `rules.md`, reuso) antes do QA; aprova ou pede mudanças | Não (só o próprio relatório) |
 | `qa` | Checks estáticos + roteiros E2E no navegador via MCP (Playwright, Next DevTools, Neon só leitura) + regressão do sistema; aprova ou rejeita | Não (só relatórios) |
-| `docs` | Mantém `rules.md`, `README.md` e os arquivos do fluxo (`.claude/agents`, `.claude/skills`) atualizados | Só documentação |
+| `docs` | Mantém `rules.md`, `README.md`, `docs/` e os arquivos do fluxo (`.claude/agents`, `.claude/skills`) atualizados | Só documentação |
 | `commit-manager` | Identifica o ponto de commit e sugere a mensagem | Não (só leitura do git) |
 
 ### Ordem
@@ -218,14 +221,4 @@ O servidor está em **modo só leitura** (`x-read-only: "true"` em `.mcp.json`):
 
 ## 7. Decisões registradas
 
-Registro curto de decisões técnicas (mais recente primeiro). Formato: `AAAA-MM-DD — decisão — motivo`.
-
-- 2026-11-24 — Testes via MCP (Playwright, Next DevTools, Neon) em vez de runner de testes, com sessões de teste por `npm run -s qa:session` e agentes com lista explícita de ferramentas MCP (Neon só as de leitura) — preferência do usuário por validação E2E no navegador; o E2E via MCP não fica salvo e varia entre rodadas, compensado por checklist de regressão e roteiros nos relatórios; a escrita no banco fica restrita aos usuários QA pelo script, e o reviewer bloqueia instruções que liberem escrita via MCP.
-
-- 2026-11-24 — Adotados MCPs (playwright, context7, neon, next-devtools, shadcn) em `.mcp.json`, com o Neon remoto autenticado por API key de escopo de projeto (`NEON_API_KEY`, fora do repositório) — dar aos agentes navegador, documentação atualizada e inspeção do banco. Servidor em modo só leitura (`x-read-only: "true"`): o `run_sql` roda em transação read-only e a escrita pelo MCP fica bloqueada pelo servidor; as regras da seção "Uso do MCP do Neon" e a revisão são segunda camada, e o point-in-time restore do Neon é o recurso de recuperação.
-
-- 2026-11-23 — Evitar `useEffect` e tipar props com `interface` — efeitos causam renderizações extras e bugs de sincronização quando usados para buscar dados ou derivar estado; `interface` padroniza a tipagem já usada nos componentes existentes.
-
-- 2026-11-23 — Inclusão do agente `reviewer` antes do QA — pegar bugs, falhas de segurança e desvios das regras que testes não detectam, antes de gastar uma rodada de QA.
-
-- 2026-11-23 — Adoção do fluxo multi-agente descrito na seção 5 — separar responsabilidades e garantir QA e commit a cada etapa.
+As decisões técnicas ficam em [docs/decisions/README.md](docs/decisions/README.md) (índice e um ADR por decisão). Toda decisão técnica relevante vira um ADR: o `docs` cria o arquivo e atualiza o índice. Decisão revertida não é apagada: o ADR antigo vira "substituída por NNNN".
