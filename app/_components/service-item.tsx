@@ -39,7 +39,7 @@ interface ServiceItemProps {
 }
 
 interface GetTimeListProps {
-  bookings: Booking[]
+  bookings: Pick<Booking, "date">[]
   selectedDay: Date
 }
 
@@ -98,7 +98,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     undefined,
   )
 
-  const [dayBookings, setDayBookings] = useState<Booking[]>([])
+  const [dayBookings, setDayBookings] = useState<Pick<Booking, "date">[]>([])
   const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false)
 
   useEffect(() => {
