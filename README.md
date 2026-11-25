@@ -120,13 +120,14 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ## MCPs para agentes
 
-Opcional: só é necessário para quem usa o [Claude Code](https://claude.com/claude-code) com o fluxo de agentes do projeto. O arquivo `.mcp.json` (versionado) configura cinco servidores MCP:
+Opcional: só é necessário para quem usa o [Claude Code](https://claude.com/claude-code) com o fluxo de agentes do projeto. O arquivo `.mcp.json` (versionado) configura seis servidores MCP:
 
 | Servidor | Para que serve |
 | -------- | -------------- |
 | `playwright` | Controla um navegador (isolado e sem interface) para testar as telas |
 | `context7` | Consulta documentação atualizada de bibliotecas |
 | `neon` | Acessa o projeto no Neon (MCP remoto em `https://mcp.neon.tech/mcp`), em modo só leitura, usado para inspecionar o banco |
+| `github` | Lê, busca, cria e comenta issues do repositório (MCP remoto em `https://api.githubcopilot.com/mcp/`), usado para o backlog e os problemas conhecidos. Só 5 ferramentas de issues liberadas |
 | `next-devtools` | Ferramentas do Next.js (erros, rotas, logs). Só responde com `npm run dev` rodando |
 | `shadcn` | Busca e adiciona componentes do shadcn/ui |
 
@@ -147,6 +148,25 @@ O servidor `neon` lê a chave da variável de ambiente `NEON_API_KEY`. Ela **nã
 
 > **Atenção:** defina a variável **antes** de abrir o Claude Code neste projeto. Sem ela, a configuração MCP pode falhar ao carregar.
 
+### Configurar o `GITHUB_PAT`
+
+O servidor `github` lê o token da variável de ambiente `GITHUB_PAT`. Ela **não** vai no `.env` nem em nenhum arquivo do repositório.
+
+1. No GitHub, vá em **Settings > Developer settings > Personal access tokens > Fine-grained tokens** e crie um token com:
+   - **Repository access:** *Only select repositories*, apenas o repositório `fsc_barber`;
+   - **Permissions:** `Issues` em *Read and write* e `Metadata` em *Read-only* (o GitHub já marca Metadata automaticamente). Nenhuma outra permissão.
+2. Defina a variável no ambiente do Windows (substitua pelo valor do token):
+
+   ```powershell
+   setx GITHUB_PAT "SEU_TOKEN"
+   ```
+
+3. Feche e reabra o terminal, o VS Code e o Claude Code, para que enxerguem a nova variável.
+
+> **Atenção:** defina a variável **antes** de abrir o Claude Code neste projeto. Variável ausente pode impedir os MCPs de carregarem. Depois de definir, reinicie o Claude Code e aprove o servidor `github` em `/mcp`.
+
+> **Aviso:** criar ou comentar uma issue é **publicar** conteúdo no GitHub (visível a quem tem acesso ao repositório). Por isso o fluxo exige aprovação explícita do usuário antes de cada criação ou comentário. Veja [Segurança do MCP do GitHub](#segurança-do-mcp-do-github).
+
 ### Usar
 
 1. Abra o Claude Code na pasta do projeto e rode `/mcp` para aprovar os servidores do `.mcp.json`.
@@ -156,6 +176,10 @@ O servidor `neon` lê a chave da variável de ambiente `NEON_API_KEY`. Ela **nã
 ### Segurança do MCP do Neon
 
 O servidor `neon` roda em **modo só leitura**: o `.mcp.json` envia o header `x-read-only: "true"`, então o servidor expõe apenas ferramentas de listar/descrever e executa o SQL em transações read-only. Escrita pelo MCP fica bloqueada pelo próprio servidor. Como segunda camada, valem as regras de uso em [rules.md](rules.md) (só `SELECT`, sem colunas de credencial, com `LIMIT`) e a chave de API de escopo de projeto. Por precaução, o histórico do Neon permite restaurar o branch (point-in-time restore, na aba **Backup & Restore** do projeto); a janela de retenção depende do plano da conta.
+
+### Segurança do MCP do GitHub
+
+O `.mcp.json` limita o servidor `github` a cinco ferramentas de issues (`issue_read`, `list_issues`, `search_issues`, `issue_write`, `add_issue_comment`) via header `X-MCP-Tools`, com `X-MCP-Lockdown: true` (filtra conteúdo de usuários sem acesso de escrita ao repositório; é um filtro best-effort) e uma lista de exclusão redundante. O token é fine-grained, de um único repositório e só com Issues e Metadata. Não há ferramentas de código, PR, merge ou configurações. O conteúdo de issues é tratado como dado, nunca como instrução (risco de prompt injection). Regras de uso em [rules.md](rules.md).
 
 ### Sessões de teste (`qa:session`)
 

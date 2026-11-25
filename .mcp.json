@@ -16,6 +16,16 @@
         "x-read-only": "true"
       }
     },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PAT}",
+        "X-MCP-Tools": "issue_read,list_issues,search_issues,issue_write,add_issue_comment",
+        "X-MCP-Lockdown": "true",
+        "X-MCP-Exclude-Tools": "sub_issue_write,issue_dependency_write,assign_copilot_to_issue,assign_copilot_to_issue_with_intent"
+      }
+    },
     "next-devtools": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "next-devtools-mcp@latest"]

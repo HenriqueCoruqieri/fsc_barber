@@ -3,6 +3,8 @@
 - Status: aceita
 - Data: 2026-11-24
 
+> Revisão parcial: a parte "problemas conhecidos em `docs/`" foi revista pelo [0007](0007-github-issues-backlog.md); problemas conhecidos e backlog ficam nas GitHub Issues.
+
 ## Contexto
 
 O `rules.md` é carregado em toda tarefa via `CLAUDE.md`. Misturar nele regras vigentes com conhecimento de consulta (histórico de decisões, regras de negócio, estratégia de testes, arquitetura, problemas conhecidos) faz o contexto carregado a cada tarefa crescer sem limite.

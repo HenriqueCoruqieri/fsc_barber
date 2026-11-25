@@ -35,3 +35,4 @@ Registro das decisões técnicas relevantes do projeto, uma por arquivo (`NNNN-<
 | [0004](0004-mcp-servers.md) | Adoção dos servidores MCP (Neon remoto, modo só leitura) | aceita | 2026-11-24 |
 | [0005](0005-mcp-based-testing.md) | Testes via MCP em vez de runner de testes | aceita | 2026-11-24 |
 | [0006](0006-docs-folder-and-adrs.md) | Pasta docs/ com ADRs e separação rules.md × docs/ | aceita | 2026-11-24 |
+| [0007](0007-github-issues-backlog.md) | Backlog e problemas conhecidos em GitHub Issues via MCP | aceita | 2026-11-25 |
