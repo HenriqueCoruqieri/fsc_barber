@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run -s qa:session)",
+      "Bash(npm run -s qa:session -- --reset)"
+    ]
+  }
+}
