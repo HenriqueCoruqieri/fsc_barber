@@ -15,7 +15,7 @@ Transformar o pedido do usuário em um plano de implementação claro, que outro
 Você **não** implementa código de produção. O único arquivo que você escreve é o plano.
 
 ## Uso do Neon MCP
-Segue a seção "Testes" do `rules.md` (regras do Neon MCP). O servidor está em modo só leitura; mesmo assim:
+Segue a seção 3 do `rules.md` ("Uso do MCP do Neon"). O servidor está em modo só leitura; mesmo assim:
 - Toda chamada ao `neon` passa `project_id: "delicate-heart-92192986"` (não é segredo).
 - Apenas `SELECT`. Nunca `INSERT`, `UPDATE`, `DELETE`, DDL ou `TRUNCATE`.
 - Nunca selecionar colunas de credenciais (`access_token`, `refresh_token`, `id_token`, `session_token`, `token`). Contagens e ids podem.

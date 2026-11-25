@@ -13,7 +13,7 @@ Você (sessão principal) é o **orquestrador** (seção 5 do `rules.md`). Não 
 
 ## 1. Definir o alvo
 - **Vazio** → mudanças não commitadas (`git status` / `git diff`). Se não houver nenhuma, pergunte com AskUserQuestion: **Rodar regressão completa** / **Informar um alvo**.
-- **`all`** → regressão completa do sistema: checks estáticos (tsc, lint, build) + checklist de regressão do `rules.md`.
+- **`all`** → regressão completa do sistema: checks estáticos (tsc, lint, build) + checklist de regressão de `docs/testing.md`.
 - **Arquivo ou pasta** existente → os fluxos afetados por esse código (o QA identifica quem o usa e testa esses fluxos no navegador).
 - **Descrição de funcionalidade** (ex.: "cancelamento de agendamento") → o QA localiza o código relacionado e testa os fluxos no navegador.
 

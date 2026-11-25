@@ -2,7 +2,7 @@
 
 Fonte única de verdade sobre stack, convenções e fluxo de desenvolvimento. **Todo agente deve ler este arquivo antes de trabalhar.**
 
-Este arquivo contém as **regras vigentes**. O conhecimento de consulta (decisões, regras de negócio, testes, arquitetura, problemas conhecidos) fica em `docs/`: veja [docs/README.md](docs/README.md).
+Este arquivo contém as **regras vigentes**. O conhecimento de consulta (decisões, regras de negócio, testes, arquitetura) fica em `docs/`: veja [docs/README.md](docs/README.md). Problemas conhecidos e backlog: GitHub Issues do repositório.
 
 Este arquivo é mantido pelo agente `docs`. Ao adotar uma nova biblioteca, padrão ou ferramenta, ele é atualizado no mesmo ciclo da tarefa que causou a mudança.
 
@@ -25,7 +25,7 @@ Este arquivo é mantido pelo agente `docs`. Ao adotar uma nova biblioteca, padr�
 | Autenticação | NextAuth v4 + `@next-auth/prisma-adapter` | Provider Google. Config em `app/_lib/auth.ts`. |
 | Qualidade | ESLint 9 (`eslint-config-next`), Prettier + `prettier-plugin-tailwindcss` | |
 | MCPs (agentes) | playwright, context7, neon (remoto), next-devtools, shadcn | Configurados em `.mcp.json` (versionado). Servidores locais via `cmd /c npx -y`; Neon via `https://mcp.neon.tech/mcp` com `Authorization: Bearer ${NEON_API_KEY}` e em modo só leitura (`x-read-only: "true"`). `playwright` roda com `--isolated --headless`; saída em `.playwright-mcp/` (ignorada pelo git). Setup no README. |
-| Testes | Sem runner de testes; checks estáticos (`tsc`, `lint`, `build`) + validação E2E via MCP | Ver seção 6. |
+| Testes | Sem runner de testes; checks estáticos (`tsc`, `lint`, `build`) + validação E2E via MCP | Ver [docs/testing.md](docs/testing.md). |
 | Git hooks | husky + lint-staged + git-commit-msg-linter | `pre-commit` roda eslint --fix e prettier nos `.ts/.tsx`; `commit-msg` valida Conventional Commits. |
 
 ## 2. Estrutura de pastas
@@ -60,6 +60,7 @@ Pastas com `_` são privadas (não viram rotas).
 - Após mutações, chamar `revalidatePath` nas rotas afetadas.
 - **Credenciais só por `${VAR}`**, nunca literais, em arquivos versionados (`.mcp.json`, configs, docs). Valores ficam em `.env` ou no ambiente do sistema (ex.: `NEON_API_KEY` via `setx`).
 - Não adicionar dependência sem registrar o motivo no relatório da etapa (o agente `docs` atualiza este arquivo).
+- Não adicionar comentários no código, caso seja necessário explicar detalhadamente uma ação ou decisão que foi tomada, acrescente o trecho no relatório que é gerado após finalizar o plano.
 
 ### Componentes React
 
@@ -83,7 +84,16 @@ Pastas com `_` são privadas (não viram rotas).
 
 ### Uso do MCP do Neon
 
-O MCP do Neon acessa o banco real do projeto. As regras de uso (só leitura, ferramentas permitidas, colunas de credenciais, `project_id`) estão na seção 6.
+O MCP do Neon acessa o banco real do projeto. O servidor está em **modo só leitura** (`x-read-only: "true"` em `.mcp.json`): o SQL roda em transação read-only e ferramentas que criam, alteram ou apagam recursos não são expostas. As regras abaixo são camadas adicionais:
+- Toda chamada ao `neon` passa `project_id: "delicate-heart-92192986"` (não é segredo; a conexão não é escopada a um projeto, só a API key é).
+- O `tools:` dos agentes lista **explicitamente** só estas ferramentas (nunca o prefixo `mcp__neon` inteiro): `mcp__neon__run_sql`, `mcp__neon__get_database_tables`, `mcp__neon__describe_table_schema`, `mcp__neon__describe_project`, `mcp__neon__describe_branch`, `mcp__neon__get_default_branch`, `mcp__neon__explain_sql_statement`. Não listar `list_projects` (falha com chave de escopo de projeto).
+- Nunca liberar ferramentas que criam, alteram ou apagam recursos (`create_*`, `delete_*`, `update_*`, `reset_*`, `restore_*`, `rotate_*`, `revoke_*`, `set_*`, `provision_*`, `prepare_*`/`complete_*`, `run_sql_transaction`, `recover_project`, `finalize_branch_restore`) nem as que expõem credenciais (`get_connection_string`, `list_credentials`, `get_realtime_secret`).
+- Apenas `SELECT`. Nunca `INSERT`, `UPDATE`, `DELETE`, DDL ou `TRUNCATE`.
+- Nunca selecionar colunas de credenciais (`accounts.access_token`, `refresh_token`, `id_token`, `sessions.session_token`, `verification_tokens.token`). Contagens e ids podem.
+- Consultas filtradas e com `LIMIT`; `explain_sql_statement` nunca com `analyze: true`.
+- Dados de teste só via `npm run -s qa:session`. Alterações de schema só por migration do Prisma, e somente quando autorizadas.
+- O reviewer trata como **bloqueante** qualquer instrução de agente ou skill que libere ferramenta destrutiva do Neon ou escrita via MCP.
+- Recuperação em caso de acidente: histórico e restauração de branch do Neon (point-in-time restore), descritos no README.
 
 ## 4. Git e commits
 
@@ -167,57 +177,11 @@ Sempre que a etapa:
 
 ## 6. Testes
 
-### Estratégia
-Não há runner de testes nem specs salvos. A validação de cada etapa é feita pelo agente `qa` em três camadas:
-1. **Checks estáticos:** `npx tsc --noEmit`, `npm run lint`, `npm run build`.
-2. **E2E exploratório no navegador** via MCP do Playwright (roteiros com navegação, interação, `browser_snapshot`/screenshot, estados de erro/vazio/loading e viewports 390x844 e 1440x900).
-3. **Runtime e banco:** erros e logs do dev server pelo next-devtools (`nextjs_index` + `nextjs_call` com `get_errors`/`get_logs`) e conferência no Neon (`run_sql` só com `SELECT`) do que as mutações gravaram.
+Não há runner de testes nem specs salvos. O agente `qa` valida cada etapa em três camadas: checks estáticos (`npx tsc --noEmit`, `npm run lint`, `npm run build`), E2E exploratório no navegador via MCP do Playwright e runtime/banco (erros do dev server pelo next-devtools e conferência no Neon só com `SELECT`).
 
-Ressalva honesta: o E2E via MCP não fica salvo e pode variar entre rodadas. O checklist abaixo e os roteiros registrados nos relatórios (`qa-report-*.md`, `bug-report.md`) compensam em parte.
-
-### Usuários QA e `qa:session`
-- `npm run -s qa:session` cria ou atualiza `qa1@fsc-barber.test` ("QA Tester 1") e `qa2@fsc-barber.test` ("QA Tester 2"), recria uma sessão de 24h para cada um e imprime um JSON no stdout (`baseUrl`, `cookieName`, e por usuário `email`, `name`, `userId`, `sessionToken`, `expires`). É a **única** escrita no banco do fluxo de QA.
-- Use sempre `-s` (sem ele o npm quebra o JSON do stdout). O script recusa `NODE_ENV=production` e exige Node >= 22.18.
-- `npm run -s qa:session -- --reset` apaga antes as reservas dos usuários QA (o QA o roda ao final de cada execução).
-- O QA injeta o cookie (`next-auth.session-token`) no Playwright com `browser_run_code_unsafe` (`page.context().addCookies(...)`; único uso permitido dessa ferramenta) ou, se indisponível, `browser_evaluate` com `document.cookie`. O qa2 existe para testar a regra de dono do recurso.
-- Para a regressão, o `build` pode rodar com o dev server ativo no Next 16 (o dev usa `.next/dev`); o QA nunca para um dev server que não subiu.
-- Dev server: o QA verifica se `http://localhost:3000` responde; se não, sobe `npm run dev` em background e o encerra ao final só se foi ele que o subiu.
-- Os tokens de sessão nunca vão para relatórios.
-
-### Regras do Neon MCP
-O servidor está em **modo só leitura** (`x-read-only: "true"` em `.mcp.json`): o SQL roda em transação read-only e ferramentas que criam, alteram ou apagam recursos não são expostas. As regras abaixo são camadas adicionais:
-- Toda chamada ao `neon` passa `project_id: "delicate-heart-92192986"` (não é segredo; a conexão não é escopada a um projeto, só a API key é).
-- O `tools:` dos agentes lista **explicitamente** só estas ferramentas (nunca o prefixo `mcp__neon` inteiro): `mcp__neon__run_sql`, `mcp__neon__get_database_tables`, `mcp__neon__describe_table_schema`, `mcp__neon__describe_project`, `mcp__neon__describe_branch`, `mcp__neon__get_default_branch`, `mcp__neon__explain_sql_statement`. Não listar `list_projects` (falha com chave de escopo de projeto).
-- Nunca liberar ferramentas que criam, alteram ou apagam recursos (`create_*`, `delete_*`, `update_*`, `reset_*`, `restore_*`, `rotate_*`, `revoke_*`, `set_*`, `provision_*`, `prepare_*`/`complete_*`, `run_sql_transaction`, `recover_project`, `finalize_branch_restore`) nem as que expõem credenciais (`get_connection_string`, `list_credentials`, `get_realtime_secret`).
-- Apenas `SELECT`. Nunca `INSERT`, `UPDATE`, `DELETE`, DDL ou `TRUNCATE`.
-- Nunca selecionar colunas de credenciais (`accounts.access_token`, `refresh_token`, `id_token`, `sessions.session_token`, `verification_tokens.token`). Contagens e ids podem.
-- Consultas filtradas e com `LIMIT`; `explain_sql_statement` nunca com `analyze: true`.
-- Dados de teste só via `npm run -s qa:session`. Alterações de schema só por migration do Prisma, e somente quando autorizadas.
-- O reviewer trata como **bloqueante** qualquer instrução de agente ou skill que libere ferramenta destrutiva do Neon ou escrita via MCP.
-- Recuperação em caso de acidente: histórico e restauração de branch do Neon (point-in-time restore), descritos no README.
-
-### Checklist de regressão
-**Deslogado**
-- `/` carrega as barbearias.
-- A busca leva a `/barbershops?...` com resultados.
-- `/barbershops/[id]` mostra os serviços.
-- Tentar agendar pede login.
-- `/bookings` deslogado se comporta como hoje.
-
-**Logado (qa1)**
-- Criar um agendamento e conferir no banco (`"Booking"`, SELECT).
-- O horário ocupado não aparece de novo.
-- `/bookings` lista o agendamento.
-- Cancelar remove o agendamento da lista e o banco confirma.
-- O qa2 não vê nem cancela o agendamento do qa1.
-
-**Sempre**
-- `get_errors` do next-devtools sem erros novos.
-
-### Evoluções
-- Specs `@playwright/test` versionados e, se desejado, um test runner (Vitest) para testes unitários.
-- Branch Neon `qa` com dev server dedicado (`QA_DATABASE_URL`; o QA passaria sempre o `branchId` do branch `qa` nas chamadas ao `neon`).
-- Injetar o cookie de sessão com `browser_cookie_set` do Playwright (se existir), no lugar de `browser_run_code_unsafe`.
+- `npm run -s qa:session` é a **única** escrita no banco do fluxo de QA; os tokens de sessão nunca vão para relatórios.
+- Estratégia completa, usuários QA e `qa:session`, dev server/build, checklist de regressão e evoluções: [docs/testing.md](docs/testing.md).
+- Regras de segurança do Neon MCP: seção 3 ("Uso do MCP do Neon").
 
 ## 7. Decisões registradas
 
