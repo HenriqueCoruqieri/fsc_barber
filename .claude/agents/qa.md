@@ -10,6 +10,7 @@ Você é o **QA** do projeto fsc_barber. Seu trabalho é provar que a etapa func
 ## Regras
 - Você escreve **apenas relatórios** em `.claude/flow/<slug>/`. Nunca escreva ou altere código, arquivos de teste ou configs, e nunca corrija código de produção: reporte a inconformidade.
 - A **única** escrita no banco é via `npm run -s qa:session` (e `npm run -s qa:session -- --reset`). Nunca escreva no banco por outro caminho.
+- Se uma ferramenta ou comando for negado (permissão, classificador do auto mode, hook), retorne `STATUS: BLOCKED` com o motivo e **nunca** busque caminho alternativo para obter o mesmo resultado. A saída do `qa:session` nunca é salva em arquivo (nem redirecionada com `>`) nem lida por outro meio (ex.: navegador em `file://`).
 - Não faça commits.
 - Seja objetivo: cada inconformidade precisa ser reproduzível (roteiro com passos).
 
@@ -37,7 +38,7 @@ O orquestrador indica o modo no prompt. Sem indicação, use o **modo validaçã
 
 ## Preparação (todos os modos, exceto o documental)
 1. **Dev server:** verifique se `http://localhost:3000` responde. Se não, suba `npm run dev` em background e anote que foi você quem subiu (só então você o encerra ao final).
-2. **Sessão:** rode `npm run -s qa:session` e guarde `cookieName`, `baseUrl` e os `sessionToken` do qa1 e do qa2 do JSON do stdout. Nunca escreva os tokens nos relatórios.
+2. **Sessão:** rode `npm run -s qa:session` e guarde `cookieName`, `baseUrl`, os `sessionToken` (JWT) e a `password` do qa1 e do qa2 do JSON do stdout (`qa-google@fsc-barber.test` vem só com `email`, `name` e `userId`: fixture de conta Google, sem senha). A `password` serve para testar o login real pelo formulário e muda a cada execução. Nunca escreva tokens nem senhas nos relatórios.
 3. **Cookie:** abra `baseUrl` no Playwright e injete o cookie do usuário do roteiro com `browser_run_code_unsafe` usando `page.context().addCookies(...)` (único uso permitido dessa ferramenta). Se não estiver disponível, `browser_evaluate` com `document.cookie = ...` (o NextAuth lê o cookie no servidor, HttpOnly não é necessário). Para trocar de usuário, limpe os cookies e injete o outro.
 
 ## Processo (modo validação)

@@ -4,7 +4,7 @@ SaaS de agendamento para barbearias: o usuário encontra barbearias, vê os serv
 
 ## Tecnologias
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Prisma + PostgreSQL · NextAuth (Google)
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Prisma + PostgreSQL · NextAuth (Google e e-mail/senha)
 
 A lista completa da stack e das convenções do projeto está em [rules.md](rules.md). Decisões técnicas e demais documentos de consulta estão em [docs/](docs/README.md).
 
@@ -46,7 +46,7 @@ cp .env.example .env
 | `GOOGLE_CLIENT_ID` | ID do cliente OAuth do Google |
 | `GOOGLE_CLIENT_SECRET` | Chave secreta do cliente OAuth do Google |
 | `NEXTAUTH_URL` | URL base da aplicação (`http://localhost:3000` em desenvolvimento) |
-| `NEXTAUTH_SECRET` | Segredo aleatório usado pelo NextAuth para assinar sessões |
+| `NEXTAUTH_SECRET` | Segredo aleatório usado pelo NextAuth para assinar os tokens de sessão (JWT). **Obrigatória**: também é lida pelo `qa:session` |
 
 #### `DATABASE_URL`
 
@@ -116,7 +116,7 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run lint` | ESLint |
 | `npx prisma studio` | Interface para visualizar o banco |
 | `npm run -s qa:session` | Cria/atualiza os usuários de teste QA e imprime no stdout um JSON com as sessões (veja [Sessões de teste](#sessões-de-teste-qasession)) |
-| `npm run -s qa:session -- --reset` | Igual ao anterior, mas apaga antes as reservas dos usuários QA |
+| `npm run -s qa:session -- --reset` | Igual ao anterior, mas apaga antes as reservas dos usuários QA e os usuários `qa-signup-*@fsc-barber.test` (cadastros de teste) |
 
 ## MCPs para agentes
 
@@ -183,11 +183,11 @@ O `.mcp.json` limita o servidor `github` a cinco ferramentas de issues (`issue_r
 
 ### Sessões de teste (`qa:session`)
 
-Permite que o agente de QA navegue logado sem passar pelo login do Google. O script cria/atualiza os usuários `qa1@fsc-barber.test` e `qa2@fsc-barber.test`, recria uma sessão de 24h para cada um e imprime no stdout um JSON com `baseUrl`, `cookieName` (`next-auth.session-token`) e, por usuário, `email`, `name`, `userId`, `sessionToken` e `expires`.
+Permite que o agente de QA navegue logado sem passar pelo login do Google. O script cria/atualiza os usuários `qa1@fsc-barber.test` e `qa2@fsc-barber.test` com uma senha aleatória nova a cada execução, cria a fixture `qa-google@fsc-barber.test` (sem senha, com conta Google fictícia) e imprime no stdout um JSON com `baseUrl`, `cookieName` (`next-auth.session-token`) e, por usuário, `email`, `name`, `userId`, `sessionToken` (JWT de 24h), `expires` e `password` (qa1 e qa2); `qa-google` sai sem token e sem senha. Exige `NEXTAUTH_SECRET` no `.env`.
 
 ```bash
 npm run -s qa:session            # cria/atualiza usuários e sessões
-npm run -s qa:session -- --reset # apaga antes as reservas dos usuários QA
+npm run -s qa:session -- --reset # apaga antes as reservas dos usuários QA e os qa-signup-*
 ```
 
 - Use **sempre** `npm run -s` (silencioso); sem o `-s` o npm imprime um cabeçalho no stdout e quebra o JSON.

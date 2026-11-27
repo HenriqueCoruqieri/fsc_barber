@@ -11,16 +11,17 @@ Não há runner de testes nem specs salvos. A validação de cada etapa é feita
 Ressalva honesta: o E2E via MCP não fica salvo e pode variar entre rodadas. O checklist abaixo e os roteiros registrados nos relatórios (`qa-report-*.md`, `bug-report.md`) compensam em parte.
 
 ## Usuários QA e `qa:session`
-- `npm run -s qa:session` cria ou atualiza `qa1@fsc-barber.test` ("QA Tester 1") e `qa2@fsc-barber.test` ("QA Tester 2"), recria uma sessão de 24h para cada um e imprime um JSON no stdout (`baseUrl`, `cookieName`, e por usuário `email`, `name`, `userId`, `sessionToken`, `expires`). É a **única** escrita no banco do fluxo de QA.
+- `npm run -s qa:session` cria ou atualiza `qa1@fsc-barber.test` ("QA Tester 1") e `qa2@fsc-barber.test` ("QA Tester 2"), grava neles uma **senha aleatória nova a cada execução** (hash bcrypt) e imprime um JSON no stdout (`baseUrl`, `cookieName`, e por usuário `email`, `name`, `userId`, `sessionToken`, `expires`, `password`). O `sessionToken` é um **JWT** do NextAuth (24h, assinado com `NEXTAUTH_SECRET` do `.env`, obrigatória). Também cria a fixture `qa-google@fsc-barber.test` (sem senha, com `Account` `google` fictício), que sai no JSON só com `email`, `name` e `userId`, para testar os conflitos sem OAuth real. Não cria linhas em `sessions`. É a **única** escrita no banco do fluxo de QA.
 - Use sempre `-s` (sem ele o npm quebra o JSON do stdout). O script recusa `NODE_ENV=production` e exige Node >= 22.18.
-- `npm run -s qa:session -- --reset` apaga antes as reservas dos usuários QA (o QA o roda ao final de cada execução).
+- `npm run -s qa:session -- --reset` apaga antes as reservas dos usuários QA e dos `qa-signup-*@fsc-barber.test`, e depois esses usuários `qa-signup-*` (o QA o roda ao final de cada execução). Cadastros de teste usam só e-mails `qa-signup-<sufixo>@fsc-barber.test`.
+- Com a `password` do JSON o QA testa o login real pelo formulário de credenciais (`/api/auth/signin`). Fontes: `prisma/qa-session.ts`.
 - O QA injeta o cookie (`next-auth.session-token`) no Playwright com `browser_run_code_unsafe` (`page.context().addCookies(...)`; único uso permitido dessa ferramenta) ou, se indisponível, `browser_evaluate` com `document.cookie`. O qa2 existe para testar a regra de dono do recurso.
 - Para a regressão, o `build` pode rodar com o dev server ativo no Next 16 (o dev usa `.next/dev`); o QA nunca para um dev server que não subiu.
 - Dev server: o QA verifica se `http://localhost:3000` responde; se não, sobe `npm run dev` em background e o encerra ao final só se foi ele que o subiu.
-- Os tokens de sessão nunca vão para relatórios.
+- Os tokens de sessão e as senhas do JSON nunca vão para relatórios. A saída do `qa:session` nunca é salva em arquivo (nem com `>`) nem lida por outro meio (ex.: `file://` no navegador). Se algo for negado (permissão, classificador, hook), o QA retorna `BLOCKED` com o motivo e não busca caminho alternativo.
 
 ## Neon MCP nos testes
-As regras (só leitura, ferramentas permitidas, `project_id`, colunas de credenciais proibidas, só `SELECT`) estão na seção 3 do [`rules.md`](../rules.md). Consulta útil para conferir o que uma mutação gravou (sempre com `LIMIT`, `project_id: "delicate-heart-92192986"`, sem colunas de credenciais):
+As regras (só leitura, ferramentas permitidas, `project_id`, colunas de credenciais proibidas, só `SELECT`) estão na seção 3 do [`rules.md`](../rules.md). Consulta útil para conferir o que uma mutação gravou (sempre com `LIMIT`, `project_id: "delicate-heart-92192986"`, sem colunas de credenciais, incluindo `"User".password`; para ela só testes booleanos como `password IS NOT NULL` e `password LIKE '$2%'`):
 
 ```sql
 SELECT b."id", b."serviceId", b."date", u."email"
@@ -47,6 +48,12 @@ As tabelas de domínio (`"User"`, `"Booking"`, `"BarbershopService"`, `"Barbersh
 - `/bookings` lista o agendamento.
 - Cancelar remove o agendamento da lista e o banco confirma.
 - O qa2 não vê nem cancela o agendamento do qa1.
+
+**Login por senha**
+- `/api/auth/signin` com qa1 e a senha do `qa:session` entra; senha errada e e-mail inexistente não entram; `qa-google` com qualquer senha dá `error=GOOGLE_ACCOUNT`.
+- E-mail com maiúsculas e espaços entra.
+- `/api/auth/session` tem `user.id` e nunca `password`.
+- "Sair" desloga.
 
 **Sempre**
 - `get_errors` do next-devtools sem erros novos.

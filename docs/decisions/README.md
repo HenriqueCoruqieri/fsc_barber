@@ -36,3 +36,5 @@ Registro das decisões técnicas relevantes do projeto, uma por arquivo (`NNNN-<
 | [0005](0005-mcp-based-testing.md) | Testes via MCP em vez de runner de testes | aceita | 2026-11-24 |
 | [0006](0006-docs-folder-and-adrs.md) | Pasta docs/ com ADRs e separação rules.md × docs/ | aceita | 2026-11-24 |
 | [0007](0007-github-issues-backlog.md) | Backlog e problemas conhecidos em GitHub Issues via MCP | aceita | 2026-11-25 |
+| [0008](0008-credentials-login-with-bcryptjs.md) | Login por credenciais (Credentials provider) com bcryptjs | aceita | 2026-11-26 |
+| [0009](0009-jwt-sessions.md) | Sessão JWT no lugar da sessão de banco | aceita | 2026-11-26 |

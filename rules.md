@@ -22,7 +22,7 @@ Este arquivo é mantido pelo agente `docs`. Ao adotar uma nova biblioteca, padr�
 | Datas | date-fns, react-day-picker | |
 | Tema | next-themes | |
 | Banco | PostgreSQL + Prisma 6 (`engine: classic`) | Config em `prisma.config.ts`, schema em `prisma/schema.prisma`. |
-| Autenticação | NextAuth v4 + `@next-auth/prisma-adapter` | Provider Google. Config em `app/_lib/auth.ts`. |
+| Autenticação | NextAuth v4 + `@next-auth/prisma-adapter` + `bcryptjs` | Providers Google e Credentials (e-mail e senha, hash bcryptjs, custo 10) com sessão JWT (exigida pelo Credentials). Segredo em `NEXTAUTH_SECRET`. Config em `app/_lib/auth.ts`; schemas zod compartilhados em `app/_lib/auth-schemas.ts` (sem imports de servidor); códigos e mensagens em `app/_constants/auth.ts`. ADRs 0008 e 0009. |
 | Qualidade | ESLint 9 (`eslint-config-next`), Prettier + `prettier-plugin-tailwindcss` | |
 | MCPs (agentes) | playwright, context7, neon (remoto), github (remoto), next-devtools, shadcn | Configurados em `.mcp.json` (versionado). Servidores locais via `cmd /c npx -y`; Neon via `https://mcp.neon.tech/mcp` com `Authorization: Bearer ${NEON_API_KEY}` e em modo só leitura (`x-read-only: "true"`); GitHub via `https://api.githubcopilot.com/mcp/` com `Authorization: Bearer ${GITHUB_PAT}`, allowlist de ferramentas de issues (`X-MCP-Tools`) e `X-MCP-Lockdown: true` (backlog em Issues, ADR 0007). `playwright` roda com `--isolated --headless`; saída em `.playwright-mcp/` (ignorada pelo git). Setup no README. |
 | Testes | Sem runner de testes; checks estáticos (`tsc`, `lint`, `build`) + validação E2E via MCP | Ver [docs/testing.md](docs/testing.md). |
@@ -89,7 +89,7 @@ O MCP do Neon acessa o banco real do projeto. O servidor está em **modo só lei
 - O `tools:` dos agentes lista **explicitamente** só estas ferramentas (nunca o prefixo `mcp__neon` inteiro): `mcp__neon__run_sql`, `mcp__neon__get_database_tables`, `mcp__neon__describe_table_schema`, `mcp__neon__describe_project`, `mcp__neon__describe_branch`, `mcp__neon__get_default_branch`, `mcp__neon__explain_sql_statement`. Não listar `list_projects` (falha com chave de escopo de projeto).
 - Nunca liberar ferramentas que criam, alteram ou apagam recursos (`create_*`, `delete_*`, `update_*`, `reset_*`, `restore_*`, `rotate_*`, `revoke_*`, `set_*`, `provision_*`, `prepare_*`/`complete_*`, `run_sql_transaction`, `recover_project`, `finalize_branch_restore`) nem as que expõem credenciais (`get_connection_string`, `list_credentials`, `get_realtime_secret`).
 - Apenas `SELECT`. Nunca `INSERT`, `UPDATE`, `DELETE`, DDL ou `TRUNCATE`.
-- Nunca selecionar colunas de credenciais (`accounts.access_token`, `refresh_token`, `id_token`, `sessions.session_token`, `verification_tokens.token`). Contagens e ids podem.
+- Nunca selecionar colunas de credenciais (`accounts.access_token`, `refresh_token`, `id_token`, `sessions.session_token`, `verification_tokens.token`, `"User".password`). Contagens e ids podem; de `password` só testes booleanos como `password IS NOT NULL` e `password LIKE '$2%'`.
 - Consultas filtradas e com `LIMIT`; `explain_sql_statement` nunca com `analyze: true`.
 - Dados de teste só via `npm run -s qa:session`. Alterações de schema só por migration do Prisma, e somente quando autorizadas.
 - O reviewer trata como **bloqueante** qualquer instrução de agente ou skill que libere ferramenta destrutiva do Neon ou escrita via MCP.
@@ -204,7 +204,7 @@ Gatilhos por tipo de mudança:
 
 Não há runner de testes nem specs salvos. O agente `qa` valida cada etapa em três camadas: checks estáticos (`npx tsc --noEmit`, `npm run lint`, `npm run build`), E2E exploratório no navegador via MCP do Playwright e runtime/banco (erros do dev server pelo next-devtools e conferência no Neon só com `SELECT`).
 
-- `npm run -s qa:session` é a **única** escrita no banco do fluxo de QA; os tokens de sessão nunca vão para relatórios.
+- `npm run -s qa:session` é a **única** escrita no banco do fluxo de QA; os tokens de sessão e senhas nunca vão para relatórios nem para arquivos. Ferramenta ou comando negado leva o QA a `BLOCKED`, sem contornar (detalhes em docs/testing.md).
 - Estratégia completa, usuários QA e `qa:session`, dev server/build, checklist de regressão e evoluções: [docs/testing.md](docs/testing.md).
 - Regras de segurança do Neon MCP: seção 3 ("Uso do MCP do Neon").
 

@@ -1,16 +1,18 @@
 import { PrismaClient } from "@prisma/client"
 
+const createPrismaClient = () =>
+  new PrismaClient({ omit: { user: { password: true } } })
+
 declare global {
-  // eslint-disable-next-line no-unused-vars
-  var cachedPrisma: PrismaClient
+  var cachedPrisma: ReturnType<typeof createPrismaClient>
 }
 
-let prisma: PrismaClient
+let prisma: ReturnType<typeof createPrismaClient>
 if (process.env.NODE_ENV == "production") {
-  prisma = new PrismaClient()
+  prisma = createPrismaClient()
 } else {
   if (!global.cachedPrisma) {
-    global.cachedPrisma = new PrismaClient()
+    global.cachedPrisma = createPrismaClient()
   }
 
   prisma = global.cachedPrisma

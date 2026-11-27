@@ -1,18 +1,36 @@
-import { PrismaClient, type User } from "@prisma/client";
-import { randomUUID } from "node:crypto";
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcryptjs";
+import { randomBytes } from "node:crypto";
+import { encode } from "next-auth/jwt";
 
 try {
   process.loadEnvFile();
-} catch {
-  // .env ausente: usa as variáveis do ambiente
-}
+} catch {}
 
 const QA_USERS = [
   { email: "qa1@fsc-barber.test", name: "QA Tester 1" },
   { email: "qa2@fsc-barber.test", name: "QA Tester 2" },
 ];
 
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+interface QaOutputUser {
+  email: string;
+  name: string;
+  userId: string;
+  sessionToken?: string;
+  expires?: string;
+  password?: string;
+}
+
+const QA_GOOGLE = {
+  email: "qa-google@fsc-barber.test",
+  name: "QA Google",
+  providerAccountId: "qa-google-fixture",
+};
+
+const SIGNUP_EMAIL_PREFIX = "qa-signup-";
+const EMAIL_DOMAIN = "@fsc-barber.test";
+const SESSION_MAX_AGE_SECONDS = 24 * 60 * 60;
+const BCRYPT_COST = 10;
 
 async function main() {
   if (process.env.NODE_ENV === "production") {
@@ -22,50 +40,100 @@ async function main() {
     process.exit(1);
   }
 
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    console.error("NEXTAUTH_SECRET ausente: defina a variável no .env.");
+    process.exit(1);
+  }
+
   const reset = process.argv.includes("--reset");
   const prisma = new PrismaClient();
 
   try {
-    const users: User[] = [];
+    const users = [];
     for (const qa of QA_USERS) {
+      const password = `${randomBytes(12).toString("base64url")}a1`;
+      const passwordHash = await hash(password, BCRYPT_COST);
       const user = await prisma.user.upsert({
         where: { email: qa.email },
-        update: { name: qa.name },
-        create: { email: qa.email, name: qa.name },
+        update: { name: qa.name, password: passwordHash },
+        create: { email: qa.email, name: qa.name, password: passwordHash },
       });
-      users.push(user);
-    }
-    const userIds = users.map((user) => user.id);
-
-    if (reset) {
-      const { count } = await prisma.booking.deleteMany({
-        where: { userId: { in: userIds } },
-      });
-      console.error(`Reservas dos usuários QA removidas: ${count}`);
+      users.push({ id: user.id, email: qa.email, name: qa.name, password });
     }
 
-    const sessions = await prisma.$transaction(async (tx) => {
-      await tx.session.deleteMany({ where: { userId: { in: userIds } } });
-      return Promise.all(
-        users.map((user) =>
-          tx.session.create({
-            data: {
-              userId: user.id,
-              sessionToken: randomUUID(),
-              expires: new Date(Date.now() + SESSION_TTL_MS),
-            },
-          }),
-        ),
-      );
+    const googleUser = await prisma.user.upsert({
+      where: { email: QA_GOOGLE.email },
+      update: { name: QA_GOOGLE.name, password: null },
+      create: { email: QA_GOOGLE.email, name: QA_GOOGLE.name },
+    });
+    await prisma.account.upsert({
+      where: {
+        provider_providerAccountId: {
+          provider: "google",
+          providerAccountId: QA_GOOGLE.providerAccountId,
+        },
+      },
+      update: {},
+      create: {
+        userId: googleUser.id,
+        type: "oauth",
+        provider: "google",
+        providerAccountId: QA_GOOGLE.providerAccountId,
+      },
     });
 
-    const output = users.map((user, index) => ({
-      email: user.email,
-      name: user.name,
-      userId: user.id,
-      sessionToken: sessions[index].sessionToken,
-      expires: sessions[index].expires.toISOString(),
-    }));
+    const qaUserIds = [...users.map((user) => user.id), googleUser.id];
+
+    if (reset) {
+      const signupUsers = await prisma.user.findMany({
+        where: {
+          email: { startsWith: SIGNUP_EMAIL_PREFIX, endsWith: EMAIL_DOMAIN },
+        },
+        select: { id: true },
+      });
+      const signupIds = signupUsers.map((user) => user.id);
+
+      const { count } = await prisma.booking.deleteMany({
+        where: { userId: { in: [...qaUserIds, ...signupIds] } },
+      });
+      console.error(`Reservas dos usuários QA removidas: ${count}`);
+
+      const { count: removedUsers } = await prisma.user.deleteMany({
+        where: { id: { in: signupIds } },
+      });
+      console.error(`Usuários qa-signup removidos: ${removedUsers}`);
+    }
+
+    await prisma.session.deleteMany({ where: { userId: { in: qaUserIds } } });
+
+    const expires = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000);
+    const output: QaOutputUser[] = [];
+    for (const user of users) {
+      const sessionToken = await encode({
+        token: {
+          sub: user.id,
+          name: user.name,
+          email: user.email,
+          picture: null,
+        },
+        secret,
+        maxAge: SESSION_MAX_AGE_SECONDS,
+      });
+      output.push({
+        email: user.email,
+        name: user.name,
+        userId: user.id,
+        sessionToken,
+        expires: expires.toISOString(),
+        password: user.password,
+      });
+    }
+    output.push({
+      email: QA_GOOGLE.email,
+      name: QA_GOOGLE.name,
+      userId: googleUser.id,
+    });
 
     console.error("Sessões de teste criadas.");
     console.log(
