@@ -39,7 +39,7 @@ Passe sempre ao agente: o slug, o número da etapa e os caminhos dos artefatos r
 Se a etapa tiver `Precisa de UI Designer: sim` → chame `ui-designer`.
 
 ### 3.2 Implementação
-Chame o responsável (`frontend` ou `backend`).
+Chame o responsável (`frontend`, `backend` ou `docs`).
 - `BLOCKED` (migration, lib nova não prevista, dúvida) → leve a decisão ao usuário com AskUserQuestion e devolva a resposta ao **mesmo** agente via SendMessage.
 
 ### 3.3 Review
@@ -48,13 +48,16 @@ Se `Precisa de review: sim` → chame `reviewer` (rodada 1).
 - Máximo **2 rodadas**. Depois disso, mostre os bloqueantes restantes ao usuário e pergunte como seguir.
 
 ### 3.4 QA
-Chame `qa` com o relatório do executor e, se houver, o do reviewer.
+Chame `qa` com o relatório do executor e, se houver, o do reviewer. Quando o responsável for `docs` ou a etapa for só de configuração, peça o **modo documental** (sem E2E).
 - `BLOCKED` (MCP indisponível, `NEON_API_KEY` ausente, `qa:session` falhando ou dev server que não sobe) → leve o motivo ao usuário e aguarde que ele resolva (ex.: definir a variável, reiniciar o Claude Code) antes de chamar o QA de novo.
 - `REJECTED` → envie as inconformidades ao(s) executor(es) indicado(s) via SendMessage → se a etapa tem review, chame o `reviewer` apenas sobre o diff da correção → chame o `qa` novamente.
 - Máximo **3 rodadas**. Depois disso, mostre as inconformidades ao usuário e pergunte como seguir.
 
 ### 3.5 Docs
-Chame `docs` se `Precisa de docs: sim` **ou** se algum relatório trouxer algo em `MUDANÇAS DE STACK`.
+Chame `docs` se `Precisa de docs: sim`, se algum relatório trouxer algo em `MUDANÇAS DE STACK` **ou** se o plano tiver itens em "Regras de negócio afetadas" ou "Decisões a registrar (ADRs)".
+
+### 3.5b Propostas de issue
+Se o reviewer ou o QA trouxerem `PROPOSTAS DE ISSUE`, o **orquestrador** monta título + corpo de cada proposta a partir dos campos recebidos (título, onde, descrição, segurança), no formato da seção "Issues no GitHub" do `docs.md` (descrição, onde acontece, como reproduzir, origem, regra `RN-*` afetada), sem tokens, dados de usuários nem valores de `.env` nem saída de SQL com dados pessoais, e mostra ao usuário antes de perguntar. Para cada uma, pergunte com AskUserQuestion: **Criar issue** / **Não criar**. Para as de segurança, peça antes uma confirmação separada, avisando que o problema ficará público. Só então chame o `docs` com a lista aprovada, dizendo no prompt que o usuário aprovou (e, nas de segurança, que confirmou a publicação). Sem aprovação, nada é criado.
 
 ### 3.6 Commit
 1. Chame `commit-manager`. Se retornar `NOT_READY`, resolva o motivo (ex.: acionar o `docs`) e chame de novo.
@@ -76,6 +79,7 @@ Quando todas as etapas estiverem concluídas, mostre:
 - Etapas com os commits (`git log --oneline -<n>`)
 - Roteiros executados pelo QA (nos `qa-report-etapa-<n>.md`)
 - Premissas assumidas pelo arquiteto
+- Issues criadas e issues resolvidas por `closes #N` (estas só fecham quando o commit for enviado ao GitHub; nunca faça `git push` sem pedido explícito)
 - **Sugestões do reviewer não aplicadas** — pergunte se o usuário quer transformá-las em um novo plano de `refactor:` (via `/consult`).
 
 Se o usuário interromper no meio, o progresso fica no `plan.md`; basta rodar `/implement <slug>` de novo para retomar.

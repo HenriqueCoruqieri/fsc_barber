@@ -34,3 +34,5 @@ Se houver problemas, para cada um ofereça o comando pronto:
 ```
 /fix <descrição curta do problema>
 ```
+
+O **orquestrador** monta título + corpo de cada proposta a partir dos campos recebidos (título, onde, descrição, segurança), no formato da seção "Issues no GitHub" do `docs.md` (descrição, onde acontece, como reproduzir, origem, regra `RN-*` afetada), sem tokens, dados de usuários nem valores de `.env` nem saída de SQL com dados pessoais, e mostra ao usuário antes de perguntar. Pergunte, para cada problema, com AskUserQuestion: **Criar issue** / **Não criar**. Para problemas de segurança, peça antes uma confirmação separada, avisando que a issue ficará pública. Se aprovado, chame o `docs` dizendo no prompt que o usuário aprovou (e, nas de segurança, que confirmou a publicação); com a issue criada, o comando sugerido vira `/fix #N`. Sem aprovação, nada é criado.

@@ -1,13 +1,13 @@
 ---
 name: fix
 description: Fluxo enxuto para correção de bugs - o QA reproduz o bug com um roteiro E2E, o executor corrige, o reviewer revisa, o QA valida e o commit-manager sugere um commit fix. Use quando o usuário rodar /fix seguido da descrição do bug.
-argument-hint: <descrição do bug>
+argument-hint: "<descrição do bug> | #<número da issue>"
 disable-model-invocation: true
 ---
 
 # /fix — Correção de bug
 
-Bug relatado:
+Bug relatado (descrição ou `#N`, número de uma issue do GitHub):
 
 $ARGUMENTS
 
@@ -15,16 +15,16 @@ Você (sessão principal) é o **orquestrador** (seção 5 do `rules.md`). Não 
 
 ## 1. Preparação
 1. Se a descrição estiver vazia ou vaga demais para reproduzir (sem tela, ação ou comportamento), pergunte ao usuário com AskUserQuestion: onde acontece, passos, o que esperava e o que aconteceu.
-2. Gere um slug `fix-<resumo>` (ex.: `fix-horario-passado`) e crie `.claude/flow/<slug>/`.
+2. Gere um slug `fix-<resumo>` (ex.: `fix-horario-passado`) e crie `.claude/flow/<slug>/`. Se o argumento for `#N`, o slug é `fix-<N>-<resumo>` e o QA lê a issue como descrição do bug.
 3. Rode `git status`. Se houver mudanças não commitadas, avise e pergunte se deve continuar.
 
 ## 2. Reprodução (qa)
-Chame o `qa` em **modo reprodução** com a descrição do bug e o slug.
+Chame o `qa` em **modo reprodução** com a descrição do bug (ou o `#N`) e o slug. Sem número, o QA procura uma issue existente e a cita no `bug-report.md`.
 - `REPRODUCED` → ele terá reproduzido o bug no navegador (MCP) e gravado o **roteiro de reprodução** no `bug-report.md` com causa provável, arquivos suspeitos e responsável (`frontend` ou `backend`). Vá para o passo 3.
 - `NOT_REPRODUCED` → mostre ao usuário o que foi tentado e peça mais detalhes; envie ao mesmo QA via SendMessage. Após 2 tentativas sem sucesso, pergunte se o usuário quer seguir só com a análise de código do QA (sem roteiro) ou encerrar.
 - `BLOCKED` (MCP indisponível, `NEON_API_KEY` ausente, `qa:session` falhando ou dev server que não sobe) → mostre o motivo e pergunte se o usuário resolve ou se segue só com análise de código.
 
-**Escopo:** se o `bug-report.md` indicar que a correção exige mudança de schema/migration, envolve várias áreas ou muda regra de negócio, pare e sugira ao usuário tratar com `/consult` (mostre o diagnóstico do QA). Bug simples segue aqui.
+**Escopo:** se o `bug-report.md` indicar que a correção exige mudança de schema/migration, envolve várias áreas ou muda regra de negócio (inclusive quando a issue tem o label `regra-de-negócio`), pare e sugira ao usuário tratar com `/consult` (mostre o diagnóstico do QA). Bug simples segue aqui.
 
 ## 3. Correção
 Chame o responsável indicado (`frontend` ou `backend`) com o slug e a instrução: "O plano desta tarefa é `.claude/flow/<slug>/bug-report.md`. Corrija a causa raiz do bug — não altere o roteiro de reprodução para fazê-lo passar. Mudança mínima, sem refatorações fora do escopo."
@@ -42,7 +42,7 @@ Chame o `qa` em **modo validação** com o slug, informando que o plano é o `bu
 Chame o `docs` apenas se algum relatório trouxer algo em `MUDANÇAS DE STACK`.
 
 ## 7. Commit
-1. Chame o `commit-manager` com o slug, informando que o relatório do QA é `.claude/flow/<slug>/qa-report.md` e que o commit deve ser do tipo `fix`.
+1. Chame o `commit-manager` com o slug, informando que o relatório do QA é `.claude/flow/<slug>/qa-report.md` e que o commit deve ser do tipo `fix`. Se há `#N`, a mensagem sugerida termina com `(closes #N)`.
 2. Pause e mostre: bug corrigido, causa raiz (1 linha do `bug-report.md`), arquivos e mensagem sugerida.
 3. Pergunte com AskUserQuestion: **Commitar agora** / **Eu mesmo vou commitar** / **Ajustar mensagem**.
    - Commitar agora → `git add <arquivos listados>` (nunca `git add -A`) e `git commit -m "<mensagem>"` só com a linha de assunto. Nunca `--no-verify`; se o hook falhar, encaminhe a correção ao agente responsável.
@@ -50,4 +50,4 @@ Chame o `docs` apenas se algum relatório trouxer algo em `MUDANÇAS DE STACK`.
 4. Nunca rode `git push` sem pedido explícito.
 
 ## 8. Encerramento
-Mostre: o bug, a causa raiz, o commit e o roteiro de reprodução (registrado no `bug-report.md`; não fica salvo como teste automatizado).
+Mostre: o bug, a causa raiz, o commit e o roteiro de reprodução (registrado no `bug-report.md`; não fica salvo como teste automatizado). Se o commit tem `closes #N`, avise que a issue só fecha quando o commit for enviado ao GitHub (push, só com pedido explícito). Se o bug não tinha issue, nada é criado.

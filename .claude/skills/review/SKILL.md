@@ -28,14 +28,20 @@ Mostre ao usuário de forma resumida:
 - **Bloqueantes**: arquivo:linha, categoria, problema e correção sugerida
 - **Sugestões** (não bloqueiam)
 - Pontos de atenção para testes
+- **Propostas de issue** (fora do escopo do diff), tratadas no passo 3b
+
+Se o reviewer trouxe propostas de issue, execute o passo 3b **antes** de perguntar e de encerrar em qualquer das opções abaixo.
 
 Se houver bloqueantes ou sugestões, pergunte com AskUserQuestion:
 - **Corrigir com os agentes** → passo 4.
 - **Vou corrigir eu mesmo** → encerre; lembre que pode rodar `/review` de novo depois.
 - **Só o relatório** → encerre, informando o caminho `.claude/flow/<slug>/review.md`.
 
+## 3b. Propostas de issue
+Se o reviewer trouxer `PROPOSTAS DE ISSUE`, o **orquestrador** monta título + corpo de cada proposta a partir dos campos recebidos (título, onde, descrição, segurança), no formato da seção "Issues no GitHub" do `docs.md` (descrição, onde acontece, como reproduzir, origem, regra `RN-*` afetada), sem tokens, dados de usuários nem valores de `.env` nem saída de SQL com dados pessoais, e mostra ao usuário antes de perguntar. Para cada uma, pergunte com AskUserQuestion: **Criar issue** / **Não criar**. Para as de segurança, peça antes uma confirmação separada, avisando que a issue ficará pública. Só então chame o `docs` com a lista aprovada, dizendo no prompt que o usuário aprovou (e, nas de segurança, que confirmou a publicação). Sem aprovação, nada é criado.
+
 ## 4. Correção (se o usuário pedir)
 1. Pergunte se deve corrigir só os bloqueantes ou também as sugestões.
-2. Envie os itens ao(s) executor(es) indicado(s) em cada apontamento (`frontend` | `backend`), com o caminho do relatório e a instrução: "Corrija apenas os itens listados, sem refatorações fora do escopo."
+2. Envie os itens ao(s) executor(es) indicado(s) em cada apontamento (`frontend` | `backend` | `docs`), com o caminho do relatório e a instrução: "Corrija apenas os itens listados, sem refatorações fora do escopo."
 3. Chame o `reviewer` de novo, apenas sobre o diff das correções. Máximo 2 rodadas; depois mostre o que restou ao usuário.
 4. Ao final, sugira validar com `/test` antes de commitar. Esta skill não faz commit.
