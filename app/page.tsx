@@ -1,4 +1,5 @@
 import Header from "./_components/header"
+import AuthErrorAlert from "./_components/auth-error-alert"
 import { Button } from "./_components/ui/button"
 import Image from "next/image"
 import { db } from "./_lib/prisma"
@@ -13,7 +14,13 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { getConfirmedBookings } from "./_data/get-confirmed-bookings"
 
-const Home = async () => {
+interface HomeProps {
+  searchParams: Promise<{ authError?: string | string[] }>
+}
+
+const Home = async ({ searchParams }: HomeProps) => {
+  const { authError: rawAuthError } = await searchParams
+  const authError = Array.isArray(rawAuthError) ? rawAuthError[0] : rawAuthError
   const session = await getServerSession(authOptions)
   const barbershops = await db.barbershop.findMany({})
   //TODO: Criar uma lógica para as avaliações das barbearias
@@ -30,6 +37,8 @@ const Home = async () => {
       {/* HEADER */}
       <Header />
       <div className="p-4">
+        <AuthErrorAlert code={authError} />
+
         <h2 className="text-xl font-bold">
           Olá, {session?.user ? session.user.name : "bem vindo!"}
         </h2>

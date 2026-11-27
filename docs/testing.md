@@ -52,6 +52,8 @@ As tabelas de domínio (`"User"`, `"Booking"`, `"BarbershopService"`, `"Barbersh
 **Login por senha**
 - `/api/auth/signin` com qa1 e a senha do `qa:session` entra; senha errada e e-mail inexistente não entram; `qa-google` com qualquer senha dá `error=GOOGLE_ACCOUNT`.
 - E-mail com maiúsculas e espaços entra.
+- Pelo dialog (menu e `/barbershops/[id]` > Reservar, deslogado): abas "Entrar" e "Cadastrar", botão Google nas duas. Login do qa1 fecha o dialog, mostra toast e atualiza o menu sem reload. Senha errada e e-mail inexistente mostram "E-mail ou senha inválidos"; `qa-google` mostra a mensagem de conta Google. Campos vazios ou inválidos não fazem requisição a `/api/auth/callback/credentials`.
+- `/?authError=google-conflict` mostra o aviso de conflito; sem o parâmetro (ou com valor desconhecido) não mostra.
 - `/api/auth/session` tem `user.id` e nunca `password`.
 - "Sair" desloga.
 

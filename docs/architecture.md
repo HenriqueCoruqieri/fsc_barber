@@ -25,7 +25,8 @@ Observações:
 - O callback `session` preenche `user.id` com `token.sub`.
 - Regras: [`business-rules/auth.md`](business-rules/auth.md).
 - O servidor lê a sessão com `getServerSession(authOptions)`; o cliente com `useSession`.
-- O login atual é feito pelo `SignInDialog` (`signIn("google")`); o formulário de senha entra em etapa posterior (por ora, `/api/auth/signin`).
+- O `SignInDialog` (`app/_components/sign-in-dialog.tsx`) tem as abas "Entrar" (`SignInForm`, `signIn("credentials", { redirect: false })`) e "Cadastrar" (`SignUpForm`), com o botão Google nas duas; é aberto pelo `SidebarSheet` e pelo `ServiceItem`. O cadastro valida no cliente, mas ainda não envia (placeholder até a action `createUser`). `/api/auth/signin` continua disponível.
+- A home (`app/page.tsx`) lê `?authError=` e mostra o `AuthErrorAlert` no servidor (conflito Google × conta com senha).
 - As sessões de teste são criadas por `npm run -s qa:session`: ver [`testing.md`](testing.md).
 
 ## Fluxo de reserva

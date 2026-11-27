@@ -5,7 +5,7 @@ import { Button } from "./ui/button"
 import { CalendarIcon, HomeIcon, LogInIcon, LogOutIcon } from "lucide-react"
 import { SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet"
 import { quickSearchOptions } from "../_constants/search"
-import { Avatar, AvatarImage } from "./ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import Link from "next/link"
 import { Dialog, DialogContent } from "./ui/dialog"
 import { signOut, useSession } from "next-auth/react"
@@ -28,13 +28,21 @@ const SidebarSheet = () => {
 
         <div className="flex items-center justify-between gap-3 border-b border-solid p-5">
           {data?.user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <Avatar size="lg">
-                <AvatarImage src={data?.user?.image ?? ""} />
+                <AvatarImage src={data.user.image ?? undefined} />
+                <AvatarFallback className="font-bold" aria-hidden="true">
+                  {(data.user.name ?? data.user.email ?? "?")
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase()}
+                </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-bold">{data.user.name}</p>
-                <p className="text-sm text-gray-400">{data.user.email}</p>
+              <div className="min-w-0">
+                <p className="truncate font-bold">{data.user.name}</p>
+                <p className="text-muted-foreground truncate text-sm">
+                  {data.user.email}
+                </p>
               </div>
             </div>
           ) : (
@@ -118,8 +126,8 @@ const SidebarSheet = () => {
         open={signInDialogIsOpen}
         onOpenChange={(open) => setSignInDialogIsOpen(open)}
       >
-        <DialogContent className="w-[80%]">
-          <SignInDialog />
+        <DialogContent className="max-h-[90dvh] w-[90%] overflow-y-auto">
+          <SignInDialog onSuccess={() => setSignInDialogIsOpen(false)} />
         </DialogContent>
       </Dialog>
     </>

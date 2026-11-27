@@ -24,3 +24,29 @@ export const signInSchema = z.object({
 })
 
 export type SignInInput = z.input<typeof signInSchema>
+
+export const signUpSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, "O nome deve ter pelo menos 2 caracteres")
+      .max(50, "O nome deve ter no máximo 50 caracteres"),
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Confirme sua senha"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+    when: ({ value }) => {
+      const data = value as { password?: unknown; confirmPassword?: unknown }
+      return (
+        typeof data.password === "string" &&
+        typeof data.confirmPassword === "string" &&
+        data.confirmPassword.length > 0
+      )
+    },
+  })
+
+export type SignUpInput = z.input<typeof signUpSchema>

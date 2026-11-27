@@ -72,6 +72,8 @@ Pastas com `_` são privadas (não viram rotas).
 
   const BookingItem = ({ booking }: BookingItemProps) => { ... }
   ```
+- **Estilo de declaração:** componentes de domínio e páginas usam `const Nome = (...) => {}` seguido de `export default Nome`, com a `interface NomeProps` logo acima. Os arquivos de `app/_components/ui/` ficam exatamente como o shadcn gera (`function` + export nomeado, props inline) e não são convertidos.
+- **Após `npx shadcn add`:** conferir se o import de `cn` aponta para `@/app/_lib/utils` e se nenhum pacote npm espúrio (ex.: `cn`) entrou no `package.json`.
 - **Evitar `useEffect`.** Antes de usá-lo, prefira:
   - **Buscar dados no servidor** (Server Component ou função de `app/_data/`) em vez de buscar no cliente dentro de um efeito.
   - **Calcular durante a renderização** valores derivados de props/estado (com `useMemo` só se o cálculo for caro), em vez de sincronizar com outro estado.
