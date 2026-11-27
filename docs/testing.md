@@ -60,7 +60,7 @@ Para etapas só de documentação ou de fluxo de agentes (sem código de `app/`)
 - fidelidade ao código (`arquivo:linha` citados confirmam a regra);
 - nada perdido em migrações de conteúdo (comparação com `git show HEAD:<arquivo>`);
 - `tools:` dos agentes inalterado;
-- `npm run lint` e `npx tsc --noEmit` sem mudanças fora de docs (o erro de lint em `prisma/seed.ts` é pré-existente, registrado nas GitHub Issues).
+- `npm run lint` e `npx tsc --noEmit` sem mudanças fora de docs (o erro de lint em `prisma/seed.ts` é pré-existente, registrado em [#6](https://github.com/HenriqueCoruqieri/fsc_barber/issues/6)).
 
 ## Evoluções
 - Specs `@playwright/test` versionados e, se desejado, um test runner (Vitest) para testes unitários.
