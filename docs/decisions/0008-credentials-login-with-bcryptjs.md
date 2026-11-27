@@ -13,7 +13,7 @@ O app só tinha login com Google. Foi pedido permitir cadastro e login com e-mai
 - Hash com `bcryptjs` (v3, custo 10): JS puro, sem binário nativo, funciona no Windows e em serverless, e já traz os próprios tipos.
 - `User.password String?` (nula para contas Google). O Prisma omite o campo em toda query (`omit: { user: { password: true } }` em `app/_lib/prisma.ts:3-4`); só o `authorize` o lê, com `omit: { password: false }`.
 - Sem vínculo de contas: o conflito de e-mail é bloqueado nos dois sentidos com mensagem clara (sem `allowDangerousEmailAccountLinking`).
-- `signInSchema` limita a senha de login a 256 caracteres (`app/_lib/auth-schemas.ts:23`) e exige só que não seja vazia, sem reaplicar as regras de força; a regra de 8 a 72 fica no `passwordSchema` (cadastro).
+- `signInSchema` limita a senha de login a 256 caracteres (`app/_lib/auth-schemas.ts:25-29`) e exige só que não seja vazia, sem reaplicar as regras de força; a regra de 8 a 72 fica no `passwordSchema` (cadastro).
 - Schemas zod compartilhados em `app/_lib/auth-schemas.ts` (sem imports de servidor); mensagens e códigos de erro em `app/_constants/auth.ts`.
 - Fora de escopo, risco aceito: verificação de e-mail, recuperação de senha e rate limit.
 

@@ -11,6 +11,7 @@ export const AUTH_MESSAGES = {
   EMAIL_ALREADY_REGISTERED: "Este e-mail já está cadastrado.",
   GOOGLE_CONFLICT:
     "Este e-mail já tem cadastro com senha. Entre pela aba Entrar com seu e-mail e senha.",
+  INVALID_DATA: "Dados inválidos",
   SIGN_UP_FAILED: "Não foi possível criar sua conta. Tente novamente.",
 } as const
 

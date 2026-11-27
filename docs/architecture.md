@@ -25,7 +25,8 @@ Observações:
 - O callback `session` preenche `user.id` com `token.sub`.
 - Regras: [`business-rules/auth.md`](business-rules/auth.md).
 - O servidor lê a sessão com `getServerSession(authOptions)`; o cliente com `useSession`.
-- O `SignInDialog` (`app/_components/sign-in-dialog.tsx`) tem as abas "Entrar" (`SignInForm`, `signIn("credentials", { redirect: false })`) e "Cadastrar" (`SignUpForm`), com o botão Google nas duas; é aberto pelo `SidebarSheet` e pelo `ServiceItem`. O cadastro valida no cliente, mas ainda não envia (placeholder até a action `createUser`). `/api/auth/signin` continua disponível.
+- O `SignInDialog` (`app/_components/sign-in-dialog.tsx`) tem as abas "Entrar" (`SignInForm`, `signIn("credentials", { redirect: false })`) e "Cadastrar" (`SignUpForm`), com o botão Google nas duas; é aberto pelo `SidebarSheet` e pelo `ServiceItem`. O cadastro valida no cliente e chama a action `createUser`; em sucesso faz `signIn("credentials", { redirect: false })` com os mesmos dados (login automático), mostra o toast, fecha o dialog e dá `router.refresh()`. `/api/auth/signin` continua disponível.
+- `createUser` (`app/_actions/create-user.ts`) é uma action pública (cria a conta, ainda não há sessão): revalida a entrada (`input: unknown`) com `signUpSchema`, bloqueia e-mail já existente (mensagem própria para conta Google), trata `P2002` como e-mail já cadastrado, grava a senha com bcrypt custo 10 e devolve `{ error } | { success: true }`, sem lançar erro nem devolver a senha.
 - A home (`app/page.tsx`) lê `?authError=` e mostra o `AuthErrorAlert` no servidor (conflito Google × conta com senha).
 - As sessões de teste são criadas por `npm run -s qa:session`: ver [`testing.md`](testing.md).
 

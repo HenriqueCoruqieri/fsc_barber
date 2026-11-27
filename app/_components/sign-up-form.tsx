@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { CircleAlertIcon, Loader2Icon } from "lucide-react"
 import { Alert, AlertDescription } from "./ui/alert"
@@ -19,6 +21,8 @@ import {
 import { Input } from "./ui/input"
 import PasswordInput from "./password-input"
 import { signUpSchema, type SignUpInput } from "../_lib/auth-schemas"
+import { AUTH_MESSAGES } from "../_constants/auth"
+import { createUser } from "../_actions/create-user"
 
 interface SignUpFormProps {
   onSuccess?: () => void
@@ -26,6 +30,7 @@ interface SignUpFormProps {
 }
 
 const SignUpForm = ({ onSuccess, onGoToSignIn }: SignUpFormProps) => {
+  const router = useRouter()
   const [formError, setFormError] = useState<string | null>(null)
 
   const form = useForm<SignUpInput>({
@@ -37,14 +42,42 @@ const SignUpForm = ({ onSuccess, onGoToSignIn }: SignUpFormProps) => {
 
   const { isSubmitting } = form.formState
 
-  const submitSignUpPlaceholder = async (values: SignUpInput) => {
-    void [values, onSuccess, onGoToSignIn]
-    toast.info("Cadastro disponível em breve")
-  }
-
   const handleSubmit = async (values: SignUpInput) => {
     setFormError(null)
-    await submitSignUpPlaceholder(values)
+
+    try {
+      const result = await createUser(values)
+
+      if ("error" in result) {
+        if (
+          result.error === AUTH_MESSAGES.EMAIL_ALREADY_REGISTERED ||
+          result.error === AUTH_MESSAGES.EMAIL_LINKED_TO_GOOGLE
+        ) {
+          form.setError("email", { message: result.error })
+        } else {
+          setFormError(result.error)
+        }
+        return
+      }
+
+      const login = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      }).catch(() => null)
+
+      if (!login || login.error) {
+        toast.error("Conta criada, mas não foi possível entrar. Faça login.")
+        onGoToSignIn?.()
+        return
+      }
+
+      toast.success("Conta criada com sucesso!")
+      onSuccess?.()
+      router.refresh()
+    } catch {
+      setFormError(AUTH_MESSAGES.SIGN_UP_FAILED)
+    }
   }
 
   return (

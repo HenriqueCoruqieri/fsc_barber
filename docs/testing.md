@@ -53,6 +53,9 @@ As tabelas de domínio (`"User"`, `"Booking"`, `"BarbershopService"`, `"Barbersh
 - `/api/auth/signin` com qa1 e a senha do `qa:session` entra; senha errada e e-mail inexistente não entram; `qa-google` com qualquer senha dá `error=GOOGLE_ACCOUNT`.
 - E-mail com maiúsculas e espaços entra.
 - Pelo dialog (menu e `/barbershops/[id]` > Reservar, deslogado): abas "Entrar" e "Cadastrar", botão Google nas duas. Login do qa1 fecha o dialog, mostra toast e atualiza o menu sem reload. Senha errada e e-mail inexistente mostram "E-mail ou senha inválidos"; `qa-google` mostra a mensagem de conta Google. Campos vazios ou inválidos não fazem requisição a `/api/auth/callback/credentials`.
+- Cadastro pela aba "Cadastrar" com `qa-signup-<sufixo>@fsc-barber.test` (também com maiúsculas e espaços no e-mail): o dialog fecha, aparece "Conta criada com sucesso!" e o menu mostra o nome já logado (login automático). Neon: e-mail em minúsculas e `password LIKE '$2%'`. A nova conta consegue reservar.
+- Cadastro com e-mail já existente mostra "Este e-mail já está cadastrado." no campo e-mail; com `qa-google@fsc-barber.test` mostra a mensagem de conta Google; nenhum usuário novo no banco. Campos inválidos (senha curta, sem número, confirmação diferente) não chamam a action, e a `createUser` chamada direto com dados inválidos (inclusive `null`) devolve `{ error }`, sem 500.
+- Ao final, `npm run -s qa:session -- --reset` remove os `qa-signup-*` (Neon: contagem 0).
 - `/?authError=google-conflict` mostra o aviso de conflito; sem o parâmetro (ou com valor desconhecido) não mostra.
 - `/api/auth/session` tem `user.id` e nunca `password`.
 - "Sair" desloga.
